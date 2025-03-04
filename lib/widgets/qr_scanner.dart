@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
+import '../screens/result_screen.dart';
 
 class QRScanner extends StatefulWidget {
   const QRScanner({super.key});
@@ -140,10 +141,18 @@ class _QRScannerState extends State<QRScanner> {
     setState(() {
       this.controller = controller;
     });
+
     controller.scannedDataStream.listen((scanData) {
       setState(() {
         result = scanData;
       });
+
+      // Naviguer vers ResultScreen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ResultScreen(scannedData: scanData.code!),
+        ),
+      );
     });
   }
 
