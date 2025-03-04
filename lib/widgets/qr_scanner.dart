@@ -103,7 +103,7 @@ class _QRScannerState extends State<QRScanner> {
                           onPressed: () async {
                             await controller?.resumeCamera();
                           },
-                          child: const Text('resume',
+                          child: const Text('continue',
                               style: TextStyle(fontSize: 20)),
                         ),
                       )
@@ -145,6 +145,9 @@ class _QRScannerState extends State<QRScanner> {
       setState(() {
         result = scanData;
       });
+
+      // Arrêter le scanner après la détection d'un QR code
+      controller.pauseCamera();
 
       // Naviguer vers ResultScreen
       Navigator.of(context).push(

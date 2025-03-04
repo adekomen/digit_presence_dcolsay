@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ResultScreen extends StatelessWidget {
-  final String scannedData;
+  final String scannedData; // Données scannées
 
   const ResultScreen({super.key, required this.scannedData});
 
@@ -35,6 +35,26 @@ class ResultScreen extends StatelessWidget {
                   color: Colors.black87,
                 ),
                 textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: () {
+                  // Revenir à la page d'accueil
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.deepPurple,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: const Text(
+                  'Retour à l\'accueil',
+                  style: TextStyle(fontSize: 18),
+                ),
               ),
             ],
           ),
