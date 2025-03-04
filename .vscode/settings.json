@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "C:/Users/Carnell_Thon/Documents/Projects/flutter/digit_presence_dcolsay/windows"
+    "cmake.ignoreCMakeListsMissing": true,
+    "java.compile.nullAnalysis.mode": "automatic"
 }
