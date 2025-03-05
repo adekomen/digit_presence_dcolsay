@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ResultScreen extends StatelessWidget {
-  final String scannedData; // Données scannées
-
-  const ResultScreen({super.key, required this.scannedData});
+  const ResultScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Résultat du Scan'),
-        backgroundColor: Colors.deepPurple,
+        title: const Text('Scan Réussi'),
+        backgroundColor: Colors.blue,
         elevation: 10,
       ),
       body: Center(
@@ -19,24 +17,24 @@ class ResultScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Icône de succès
+              const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 100,
+              ),
+              const SizedBox(height: 20),
+              // Message de succès
               const Text(
-                'Données scannées :',
+                'Scan réussi ! Bienvenue à DCOLSAY !',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple,
+                  color: Colors.blue,
                 ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                scannedData,
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.black87,
-                ),
-                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
+              // Bouton pour revenir à l'accueil
               ElevatedButton(
                 onPressed: () {
                   // Revenir à la page d'accueil
@@ -44,7 +42,7 @@ class ResultScreen extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Colors.blue,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(

@@ -149,10 +149,10 @@ class _QRScannerState extends State<QRScanner> {
       // Arrêter le scanner après la détection d'un QR code
       controller.pauseCamera();
 
-      // Naviguer vers ResultScreen
+      // Naviguer vers ResultScreen sans transmettre les données scannées
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => ResultScreen(scannedData: scanData.code!),
+          builder: (context) => const ResultScreen(),
         ),
       );
     });

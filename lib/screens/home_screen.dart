@@ -50,7 +50,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               const Text(
-                'Scannez votre code QR pour enregistrer votre présence',
+                'Scannez le code QR pour enregistrer votre présence ou votre départ',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.white70,
