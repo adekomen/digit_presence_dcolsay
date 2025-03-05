@@ -1,9 +1,11 @@
 import 'dart:developer';
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import '../screens/result_screen.dart';
+import '../screens/main_screen.dart'; // Importer le fichier main_screen.dart
 
 class QRScanner extends StatefulWidget {
   const QRScanner({super.key});
@@ -146,16 +148,48 @@ class _QRScannerState extends State<QRScanner> {
         result = scanData; // Met à jour le résultat avec les données scannées
       });
 
-      // Arrêter le scanner après la détection d'un QR code
-      controller.pauseCamera();
+      // Vérifier si les données scannées sont valides
+      if (_isValidQRCode(scanData.code)) {
+        // Arrêter le scanner après la détection d'un QR code
+        controller.pauseCamera();
 
-      // Naviguer vers ResultScreen sans transmettre les données scannées
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => const ResultScreen(),
+        // Naviguer vers ResultScreen
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const ResultScreen(),
+          ),
+        );
+      } else {
+        // Afficher un message d'erreur si les données ne sont pas valides
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid QR Code')),
+        );
+      }
+    });
+  }
+
+  bool _isValidQRCode(String? code) {
+    if (code == null) return false;
+
+    // Convertir la chaîne en liste de maps
+    List<Map<String, String>> scannedData;
+    try {
+      scannedData = List<Map<String, String>>.from(
+        (jsonDecode(code) as List).map(
+          (item) => Map<String, String>.from(item),
         ),
       );
-    });
+    } catch (e) {
+      return false;
+    }
+
+    // Comparer les données scannées avec les données attendues
+    for (var item in scannedData) {
+      if (!MainScreen().data.contains(item)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {

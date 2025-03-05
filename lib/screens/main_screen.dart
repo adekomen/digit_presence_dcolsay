@@ -30,6 +30,16 @@ class MainScreen extends StatelessWidget {
           embeddedImageStyle: QrEmbeddedImageStyle(
             size: Size(40, 40),
           ),
+          errorStateBuilder: (cxt, err) {
+          return Container(
+            child: Center(
+              child: Text(
+                'Uh oh! Something went wrong...',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        },
         ),
       ),
     );
