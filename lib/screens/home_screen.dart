@@ -1,3 +1,4 @@
+import 'package:digit_presence/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import '../widgets/qr_scanner.dart';
 
@@ -84,7 +85,29 @@ class HomeScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 18),
                 ),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => MainScreen(),
+                  ));
+                },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.blue,
+                  backgroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  elevation: 5,
+                ),
+                child: const Text(
+                  'GENERATE A QR CODE',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
             ],
+            
           ),
         ),
       ),
