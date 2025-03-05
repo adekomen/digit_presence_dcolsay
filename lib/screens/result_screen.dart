@@ -8,7 +8,7 @@ class ResultScreen extends StatelessWidget {
   Widget build(BuildContext context) { // Méthode build pour construire l'interface utilisateur
     return Scaffold( // Scaffold fournit une structure de base pour l'application
       appBar: AppBar(
-        title: const Text('Scan Réussi'),
+        title: const Text('Scan Réussi'), //
         backgroundColor: Colors.blue,
         elevation: 10,
       ),
