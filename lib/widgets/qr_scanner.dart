@@ -21,9 +21,9 @@ class _QRScannerState extends State<QRScanner> {
   void reassemble() {
     super.reassemble();
     if (Platform.isAndroid) {
-      controller!.pauseCamera();
+      controller!.pauseCamera(); // Pause la caméra sur Android lors de la réassemblage
     }
-    controller!.resumeCamera();
+    controller!.resumeCamera(); // Reprend la caméra
   }
 
   @override
@@ -31,7 +31,7 @@ class _QRScannerState extends State<QRScanner> {
     return Scaffold(
       body: Column(
         children: <Widget>[
-          Expanded(flex: 4, child: _buildQrView(context)),
+          Expanded(flex: 4, child: _buildQrView(context)), // Vue du scanner QR
           Expanded(
             flex: 1,
             child: FittedBox(
@@ -41,9 +41,9 @@ class _QRScannerState extends State<QRScanner> {
                 children: <Widget>[
                   if (result != null)
                     Text(
-                        'Barcode Type: ${result!.format.name}   Data: ${result!.code}')
+                        'Barcode Type: ${result!.format.name}   Data: ${result!.code}') // Affiche les données du code scanné
                   else
-                    const Text('Scan a code'),
+                    const Text('Scan a code'), // Invite à scanner un code
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -52,13 +52,13 @@ class _QRScannerState extends State<QRScanner> {
                         margin: const EdgeInsets.all(8),
                         child: ElevatedButton(
                             onPressed: () async {
-                              await controller?.toggleFlash();
+                              await controller?.toggleFlash(); // Active/désactive le flash
                               setState(() {});
                             },
                             child: FutureBuilder(
-                              future: controller?.getFlashStatus(),
+                              future: controller?.getFlashStatus(), // Récupère le statut du flash
                               builder: (context, snapshot) {
-                                return Text('Flash: ${snapshot.data}');
+                                return Text('Flash: ${snapshot.data}'); // Affiche le statut du flash
                               },
                             )),
                       ),
@@ -66,17 +66,17 @@ class _QRScannerState extends State<QRScanner> {
                         margin: const EdgeInsets.all(8),
                         child: ElevatedButton(
                             onPressed: () async {
-                              await controller?.flipCamera();
+                              await controller?.flipCamera(); // Change de caméra
                               setState(() {});
                             },
                             child: FutureBuilder(
-                              future: controller?.getCameraInfo(),
+                              future: controller?.getCameraInfo(), // Récupère les infos de la caméra
                               builder: (context, snapshot) {
                                 if (snapshot.data != null) {
                                   return Text(
-                                      'Camera facing ${snapshot.data!.name}');
+                                      'Camera facing ${snapshot.data!.name}'); // Affiche la caméra utilisée
                                 } else {
-                                  return const Text('loading');
+                                  return const Text('loading'); // Affiche un message de chargement
                                 }
                               },
                             )),
@@ -91,7 +91,7 @@ class _QRScannerState extends State<QRScanner> {
                         margin: const EdgeInsets.all(8),
                         child: ElevatedButton(
                           onPressed: () async {
-                            await controller?.pauseCamera();
+                            await controller?.pauseCamera(); // Met en pause la caméra
                           },
                           child: const Text('pause',
                               style: TextStyle(fontSize: 20)),
@@ -101,7 +101,7 @@ class _QRScannerState extends State<QRScanner> {
                         margin: const EdgeInsets.all(8),
                         child: ElevatedButton(
                           onPressed: () async {
-                            await controller?.resumeCamera();
+                            await controller?.resumeCamera(); // Reprend la caméra
                           },
                           child: const Text('continue',
                               style: TextStyle(fontSize: 20)),
@@ -122,17 +122,17 @@ class _QRScannerState extends State<QRScanner> {
     var scanArea = (MediaQuery.of(context).size.width < 400 ||
             MediaQuery.of(context).size.height < 400)
         ? 150.0
-        : 300.0;
+        : 300.0; // Définit la taille de la zone de scan
     return QRView(
       key: qrKey,
-      onQRViewCreated: _onQRViewCreated,
+      onQRViewCreated: _onQRViewCreated, // Appelé lors de la création de la vue QR
       overlay: QrScannerOverlayShape(
           borderColor: Colors.red,
           borderRadius: 10,
           borderLength: 30,
           borderWidth: 10,
-          cutOutSize: scanArea),
-      onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
+          cutOutSize: scanArea), // Définition de l'overlay du scanner
+      onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p), // Appelé lors de la définition des permissions
     );
   }
 
@@ -143,7 +143,7 @@ class _QRScannerState extends State<QRScanner> {
 
     controller.scannedDataStream.listen((scanData) {
       setState(() {
-        result = scanData;
+        result = scanData; // Met à jour le résultat avec les données scannées
       });
 
       // Arrêter le scanner après la détection d'un QR code
@@ -159,10 +159,10 @@ class _QRScannerState extends State<QRScanner> {
   }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
-    log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
+    log('${DateTime.now().toIso8601String()}_onPermissionSet $p'); // Log les permissions
     if (!p) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('no Permission')),
+        const SnackBar(content: Text('no Permission')), // Affiche un message si les permissions sont refusées
       );
     }
   }

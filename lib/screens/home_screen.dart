@@ -6,6 +6,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Construction de l'interface utilisateur
     return Scaffold(
       appBar: AppBar(
         title: const Text('Digit Presence DCOLSAY'),
@@ -13,6 +14,7 @@ class HomeScreen extends StatelessWidget {
         elevation: 10,
       ),
       body: Container(
+        // Définition du dégradé de fond
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -40,6 +42,7 @@ class HomeScreen extends StatelessWidget {
                 height: 150,
               ),
               const SizedBox(height: 20),
+              // Texte de bienvenue
               const Text(
                 'Bienvenue sur Digit Presence',
                 style: TextStyle(
@@ -49,6 +52,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
+              // Texte d'instruction
               const Text(
                 'Scannez le code QR pour enregistrer votre présence ou votre départ',
                 style: TextStyle(
@@ -58,6 +62,7 @@ class HomeScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
+              // Bouton pour scanner le QR code
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
+// Déclaration de la classe ResultScreen qui est un widget sans état
 class ResultScreen extends StatelessWidget {
-  const ResultScreen({super.key});
+  const ResultScreen({super.key}); // Constructeur de la classe avec une clé optionnelle
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) { // Méthode build pour construire l'interface utilisateur
+    return Scaffold( // Scaffold fournit une structure de base pour l'application
       appBar: AppBar(
         title: const Text('Scan Réussi'),
         backgroundColor: Colors.blue,
@@ -13,43 +14,38 @@ class ResultScreen extends StatelessWidget {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.all(20.0), 
+          child: Column( // Colonne pour organiser les widgets verticalement
+            mainAxisAlignment: MainAxisAlignment.center, // Centre les widgets verticalement
             children: [
-              // Icône de succès
-              const Icon(
+              const Icon( // Icône de succès
                 Icons.check_circle,
                 color: Colors.green,
                 size: 100,
               ),
               const SizedBox(height: 20),
-              // Message de succès
-              const Text(
+              const Text( // Message de succès
                 'Scan réussi ! Bienvenue à DCOLSAY !',
-                style: TextStyle(
+                style: TextStyle( 
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.blue,
                 ),
               ),
-              const SizedBox(height: 40),
-              // Bouton pour revenir à l'accueil
-              ElevatedButton(
+              const SizedBox(height: 40), 
+              ElevatedButton( // Bouton pour retourner à l'accueil
                 onPressed: () {
-                  // Revenir à la page d'accueil
-                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  Navigator.of(context).popUntil((route) => route.isFirst); // Revenir à la première page de la pile de navigation
                 },
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
+                  foregroundColor: Colors.white, 
                   backgroundColor: Colors.blue,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: const Text(
+                child: const Text( 
                   'Retour à l\'accueil',
                   style: TextStyle(fontSize: 18),
                 ),
