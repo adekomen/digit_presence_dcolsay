@@ -18,17 +18,6 @@ class _QRScannerState extends State<QRScanner> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  // Liste de données personnelles
-  final List<Map<String, String>> data = [
-    {
-      'name': 'JAdesu Franco',
-      'email': 'franco@gmail.com',
-    },
-    {
-      'name': 'Thon Chaboto',
-      'email': 'chaboto@gmail.com',
-    },
-  ];
 
   @override
   void reassemble() {
@@ -179,26 +168,13 @@ class _QRScannerState extends State<QRScanner> {
   bool _isValidQRCode(String? code) {
     if (code == null) return false;
 
-    // Convertir la chaîne en liste de maps
-    List<Map<String, String>> scannedData;
-    try {
-      scannedData = List<Map<String, String>>.from(
-        (jsonDecode(code) as List).map(
-          (item) => Map<String, String>.from(item),
-        ),
-      );
-    } catch (e) {
-      return false;
-    }
+    // Générer la version JSON des données de référence
+    String expectedJson = jsonEncode(MainScreen().data);
 
-    // Comparer les données scannées avec les données attendues
-    for (var item in scannedData) {
-      if (!MainScreen().data.contains(item)) {
-        return false;
-      }
-    }
-    return true;
+    // Comparer directement le JSON du QR scanné avec les données attendues
+    return code == expectedJson;
   }
+
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
     log('${DateTime.now().toIso8601String()}_onPermissionSet $p'); // Log les permissions
