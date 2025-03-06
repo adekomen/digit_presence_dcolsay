@@ -45,7 +45,7 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 20),
               // Texte de bienvenue
               const Text(
-                'Bienvenue sur Digit Presence',
+                'Bienvenue sur Digit Presence DCOLSAY',
                 style: TextStyle(
                   fontSize: 24,
                   color: Colors.white,
