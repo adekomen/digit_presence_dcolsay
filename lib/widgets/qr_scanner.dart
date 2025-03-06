@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import '../screens/result_screen.dart';
-import '../screens/main_screen.dart'; // Importer le fichier main_screen.dart
+import '../screens/main_screen.dart';
 
 class QRScanner extends StatefulWidget {
   const QRScanner({super.key});
@@ -18,6 +18,17 @@ class _QRScannerState extends State<QRScanner> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  // Liste de données personnelles
+  final List<Map<String, String>> data = [
+    {
+      'name': 'JAdesu Franco',
+      'email': 'franco@gmail.com',
+    },
+    {
+      'name': 'Thon Chaboto',
+      'email': 'chaboto@gmail.com',
+    },
+  ];
 
   @override
   void reassemble() {
@@ -41,11 +52,6 @@ class _QRScannerState extends State<QRScanner> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  if (result != null)
-                    Text(
-                        'Barcode Type: ${result!.format.name}   Data: ${result!.code}') // Affiche les données du code scanné
-                  else
-                    const Text('Scan a code'), // Invite à scanner un code
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -148,21 +154,23 @@ class _QRScannerState extends State<QRScanner> {
         result = scanData; // Met à jour le résultat avec les données scannées
       });
 
-      // Vérifier si les données scannées sont valides
+      // Vérifie si les données scannées sont valides
       if (_isValidQRCode(scanData.code)) {
         // Arrêter le scanner après la détection d'un QR code
         controller.pauseCamera();
 
-        // Naviguer vers ResultScreen
+        // Naviguer vers ResultScreen avec un message de succès
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => const ResultScreen(),
+            builder: (context) => const ResultScreen(isValid: true),
           ),
         );
       } else {
-        // Afficher un message d'erreur si les données ne sont pas valides
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid QR Code')),
+        // Naviguer vers ResultScreen avec un message d'erreur
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const ResultScreen(isValid: false),
+          ),
         );
       }
     });

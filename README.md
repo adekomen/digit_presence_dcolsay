@@ -1,6 +1,8 @@
 # Digit Presence DCOLSAY
 
-![App Screenshot](assets/screenshots/) 
+![App Screenshot](assets/screenshots/accueil.jpg)
+![App Screenshot](assets/screenshots/scan.jpg)
+![App Screenshot](assets/screenshots/result_scan.jpg)
 
 ## Description
 **Digit Presence DCOLSAY** est une application mobile développée avec Flutter pour enregistrer la présence des employés via un scan de QR code. L'application permet de scanner un QR code, d'afficher un message de succès, et de revenir à la page d'accueil après vérification.
@@ -19,7 +21,7 @@
 ## Installation
 Suivez ces étapes pour installer et exécuter l'application localement :
 1. **Cloner le dépôt** :
-   https://github.com/adekomen/digit_presence_dcolsay.git
-   cd digit_presence_dcolsay
+   - https://github.com/adekomen/digit_presence_dcolsay.git
+   - cd digit_presence_dcolsay
 2. **flutter pub get** 
 3. **flutter run**

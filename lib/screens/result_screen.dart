@@ -1,51 +1,58 @@
 import 'package:flutter/material.dart';
 
-// Déclaration de la classe ResultScreen qui est un widget sans état
 class ResultScreen extends StatelessWidget {
-  const ResultScreen({super.key}); // Constructeur de la classe avec une clé optionnelle
+  final bool isValid; // Indique si les données scannées sont valides
+
+  const ResultScreen({super.key, required this.isValid});
 
   @override
-  Widget build(BuildContext context) { // Méthode build pour construire l'interface utilisateur
-    return Scaffold( // Scaffold fournit une structure de base pour l'application
+  Widget build(BuildContext context) {
+    return Scaffold(
       appBar: AppBar(
-        title: const Text('Scan Réussi'), //
+        title: const Text('Résultat du Scan'),
         backgroundColor: Colors.blue,
         elevation: 10,
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(20.0), 
-          child: Column( // Colonne pour organiser les widgets verticalement
-            mainAxisAlignment: MainAxisAlignment.center, // Centre les widgets verticalement
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon( // Icône de succès
-                Icons.check_circle,
-                color: Colors.green,
+              // Icône de succès ou d'erreur
+              Icon(
+                isValid ? Icons.check_circle : Icons.error,
+                color: isValid ? Colors.green : Colors.red,
                 size: 100,
               ),
               const SizedBox(height: 20),
-              const Text( // Message de succès
-                'Scan réussi ! Bienvenue à DCOLSAY !',
-                style: TextStyle( 
+              // Message de succès ou d'erreur
+              Text(
+                isValid
+                    ? 'Scan réussi ! Bienvenue à DCOLSAY !'
+                    : 'Scan invalide !',
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: isValid ? Colors.blue : Colors.red,
                 ),
               ),
-              const SizedBox(height: 40), 
-              ElevatedButton( // Bouton pour retourner à l'accueil
+              const SizedBox(height: 40),
+              // Bouton pour revenir à l'accueil
+              ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst); // Revenir à la première page de la pile de navigation
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                 },
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white, 
+                  foregroundColor: Colors.white,
                   backgroundColor: Colors.blue,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: const Text( 
+                child: const Text(
                   'Retour à l\'accueil',
                   style: TextStyle(fontSize: 18),
                 ),
