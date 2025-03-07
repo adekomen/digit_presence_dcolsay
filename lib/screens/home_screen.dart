@@ -1,6 +1,6 @@
 import 'package:digit_presence/screens/main_screen.dart';
 import 'package:flutter/material.dart';
-import '../widgets/qr_scanner.dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -15,23 +15,11 @@ class HomeScreen extends StatelessWidget {
         elevation: 10,
       ),
       body: Container(
-        // Définition du dégradé de fond
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color.fromARGB(255, 171, 203, 230),
-              const Color.fromARGB(255, 229, 175, 174),
-              const Color.fromARGB(255, 199, 189, 145),
-              Colors.green.shade400,
-            ],
-            stops: const [
-              0.2,
-              0.5,
-              0.7,
-              1.0
-            ],
+          image: DecorationImage(
+            image: AssetImage('assets/back_img.jpg'),
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
           ),
         ),
         child: Center(
@@ -67,7 +55,7 @@ class HomeScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const QRScanner(),
+                    builder: (context) => const LoginScreen(),
                   ));
                 },
                 style: ElevatedButton.styleFrom(
@@ -85,6 +73,7 @@ class HomeScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 18),
                 ),
               ),
+              const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(

@@ -7,7 +7,9 @@ import '../screens/result_screen.dart';
 import '../models/data.dart';
 
 class QRScanner extends StatefulWidget {
-  const QRScanner({super.key});
+  final String userId;
+
+  const QRScanner({super.key, required this.userId});
 
   @override
   State<QRScanner> createState() => _QRScannerState();
@@ -22,18 +24,20 @@ class _QRScannerState extends State<QRScanner> {
   void reassemble() {
     super.reassemble();
     if (Platform.isAndroid) {
-      controller!
-          .pauseCamera(); // Pause la caméra sur Android lors de la réassemblage
+      controller!.pauseCamera();
     }
-    controller!.resumeCamera(); // Reprend la caméra
+    controller!.resumeCamera();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Scanner QR Code'),
+      ),
       body: Column(
         children: <Widget>[
-          Expanded(flex: 4, child: _buildQrView(context)), // Vue du scanner QR
+          Expanded(flex: 4, child: _buildQrView(context)),
           Expanded(
             flex: 1,
             child: FittedBox(
@@ -49,16 +53,13 @@ class _QRScannerState extends State<QRScanner> {
                         margin: const EdgeInsets.all(8),
                         child: ElevatedButton(
                             onPressed: () async {
-                              await controller
-                                  ?.toggleFlash(); // Active/désactive le flash
+                              await controller?.toggleFlash();
                               setState(() {});
                             },
                             child: FutureBuilder(
-                              future: controller
-                                  ?.getFlashStatus(), // Récupère le statut du flash
+                              future: controller?.getFlashStatus(),
                               builder: (context, snapshot) {
-                                return Text(
-                                    'Flash: ${snapshot.data}'); // Affiche le statut du flash
+                                return Text('Flash: ${snapshot.data}');
                               },
                             )),
                       ),
@@ -66,20 +67,17 @@ class _QRScannerState extends State<QRScanner> {
                         margin: const EdgeInsets.all(8),
                         child: ElevatedButton(
                             onPressed: () async {
-                              await controller
-                                  ?.flipCamera(); // Change de caméra
+                              await controller?.flipCamera();
                               setState(() {});
                             },
                             child: FutureBuilder(
-                              future: controller
-                                  ?.getCameraInfo(), // Récupère les infos de la caméra
+                              future: controller?.getCameraInfo(),
                               builder: (context, snapshot) {
                                 if (snapshot.data != null) {
                                   return Text(
-                                      'Camera facing ${snapshot.data!.name}'); // Affiche la caméra utilisée
+                                      'Camera facing ${snapshot.data!.name}');
                                 } else {
-                                  return const Text(
-                                      'loading'); // Affiche un message de chargement
+                                  return const Text('loading');
                                 }
                               },
                             )),
@@ -94,8 +92,7 @@ class _QRScannerState extends State<QRScanner> {
                         margin: const EdgeInsets.all(8),
                         child: ElevatedButton(
                           onPressed: () async {
-                            await controller
-                                ?.pauseCamera(); // Met en pause la caméra
+                            await controller?.pauseCamera();
                           },
                           child: const Text('pause',
                               style: TextStyle(fontSize: 20)),
@@ -105,8 +102,7 @@ class _QRScannerState extends State<QRScanner> {
                         margin: const EdgeInsets.all(8),
                         child: ElevatedButton(
                           onPressed: () async {
-                            await controller
-                                ?.resumeCamera(); // Reprend la caméra
+                            await controller?.resumeCamera();
                           },
                           child: const Text('continue',
                               style: TextStyle(fontSize: 20)),
@@ -127,19 +123,17 @@ class _QRScannerState extends State<QRScanner> {
     var scanArea = (MediaQuery.of(context).size.width < 400 ||
             MediaQuery.of(context).size.height < 400)
         ? 150.0
-        : 300.0; // Définit la taille de la zone de scan
+        : 300.0;
     return QRView(
       key: qrKey,
-      onQRViewCreated:
-          _onQRViewCreated, // Appelé lors de la création de la vue QR
+      onQRViewCreated: _onQRViewCreated,
       overlay: QrScannerOverlayShape(
           borderColor: Colors.red,
           borderRadius: 10,
           borderLength: 30,
           borderWidth: 10,
-          cutOutSize: scanArea), // Définition de l'overlay du scanner
-      onPermissionSet: (ctrl, p) => _onPermissionSet(
-          context, ctrl, p), // Appelé lors de la définition des permissions
+          cutOutSize: scanArea),
+      onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
     );
   }
 
@@ -148,24 +142,29 @@ class _QRScannerState extends State<QRScanner> {
       this.controller = controller;
     });
 
-    controller.scannedDataStream.listen((scanData) {
+    controller.scannedDataStream.listen((scanData) async {
       setState(() {
-        result = scanData; // Met à jour le résultat avec les données scannées
+        result = scanData;
       });
 
-      // Vérifie si les données scannées sont valides
-      if (_isValidQRCode(scanData.code)) {
-        // Arrêter le scanner après la détection d'un QR code
-        controller.pauseCamera();
+      // Valider les données scannées via l'API
+      final responseData = await ApiService.validateQRCode(scanData.code);
 
-        // Naviguer vers ResultScreen avec un message de succès
+      // Arrêter le scanner après la détection d'un QR code
+      controller.pauseCamera();
+
+      // Naviguer vers ResultScreen avec un message de succès ou d'erreur
+      if (responseData != null && responseData['valid'] == true) {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => const ResultScreen(isValid: true),
+            builder: (context) => ResultScreen(
+              isValid: true,
+              userName: responseData['user']['name'],
+              userEmail: responseData['user']['email'],
+            ),
           ),
         );
       } else {
-        // Naviguer vers ResultScreen avec un message d'erreur
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => const ResultScreen(isValid: false),
@@ -175,23 +174,11 @@ class _QRScannerState extends State<QRScanner> {
     });
   }
 
-  bool _isValidQRCode(String? code) {
-    if (code == null) return false;
-
-    // Générer la version JSON des données de référence
-    //String expectedJson = jsonEncode(MainScreen().data);
-
-    // Comparer directement le JSON du QR scanné avec les données attendues
-    return code == jsonData;
-  }
-
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
-    log('${DateTime.now().toIso8601String()}_onPermissionSet $p'); // Log les permissions
+    log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
     if (!p) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text(
-                'no Permission')), // Affiche un message si les permissions sont refusées
+        const SnackBar(content: Text('no Permission')),
       );
     }
   }
