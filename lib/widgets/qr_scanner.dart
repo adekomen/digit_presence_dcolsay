@@ -19,6 +19,7 @@ class _QRScannerState extends State<QRScanner> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  bool isLoading = false;
 
   @override
   void reassemble() {
@@ -147,29 +148,45 @@ class _QRScannerState extends State<QRScanner> {
         result = scanData;
       });
 
-      // Valider les données scannées via l'API
-      final responseData = await ApiService.validateQRCode(scanData.code);
-
-      // Arrêter le scanner après la détection d'un QR code
+      // Arrêter le scanner après le scan
       controller.pauseCamera();
 
-      // Naviguer vers ResultScreen avec un message de succès ou d'erreur
-      if (responseData != null && responseData['valid'] == true) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => ResultScreen(
-              isValid: true,
-              userName: responseData['user']['name'],
-              userEmail: responseData['user']['email'],
+      setState(() {
+        isLoading = true; // Afficher l'indicateur de chargement
+      });
+
+      try {
+        // Valider les données scannées via l'API
+        final responseData = await ApiService.validateQRCode(scanData.code);
+        log('API Response: $responseData');
+
+        if (responseData != null && responseData['valid'] == true) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => ResultScreen(
+                isValid: true,
+                userName: responseData['user']['lastname'],
+                userEmail: responseData['user']['email'],
+              ),
             ),
-          ),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const ResultScreen(isValid: false),
+            ),
+          );
+        }
+      } catch (e) {
+        log('Error validating QR code: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Erreur lors de la validation du QR code')),
         );
-      } else {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const ResultScreen(isValid: false),
-          ),
-        );
+      } finally {
+        setState(() {
+          isLoading = false; // Masquer l'indicateur de chargement
+        });
       }
     });
   }
@@ -181,5 +198,11 @@ class _QRScannerState extends State<QRScanner> {
         const SnackBar(content: Text('no Permission')),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
   }
 }

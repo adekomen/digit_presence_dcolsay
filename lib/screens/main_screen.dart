@@ -25,28 +25,28 @@ class _MainScreenState extends State<MainScreen> {
   Future<void> fetchData() async {
     try {
       final response = await ApiService.fetchAllUsers();
-      print('Réponse reçue : ${response?.toString()}');
-      if (response != null) {
+      print(
+          'Réponse reçue : ${response?.toString()}'); // Vérifie ce qui est reçu
+
+      if (response != null && response.isNotEmpty) {
         setState(() {
-          jsonData = jsonEncode(response); // Convertir les données en JSON
+          jsonData = jsonEncode(response); // Convertit en JSON
           isLoading = false;
         });
       } else {
+        print('Données vides ou null.');
         setState(() {
+          jsonData =
+              '{"message": "Aucune donnée reçue"}'; // Met un message par défaut
           isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Erreur lors de la récupération des données')),
-        );
       }
     } catch (e) {
+      print('Erreur : $e');
       setState(() {
+        jsonData = '{"message": "Erreur lors de la récupération"}';
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur : $e')),
-      );
     }
   }
 
