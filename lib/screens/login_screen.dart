@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/qr_scanner.dart';
-import '../models/data.dart'; // Importez ApiService
+import '../models/data.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,6 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ? const CircularProgressIndicator() // Afficher un indicateur de chargement
                 : ElevatedButton(
                     onPressed: () async {
+                      final apiService = ApiService();
                       final userId = _userIdController.text.trim();
                       if (userId.isNotEmpty) {
                         setState(() {
@@ -44,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         });
 
                         // Vérifier si l'ID existe dans la base de données
-                        final user = await ApiService.fetchUserById(userId);
+                        final user = await apiService.fetchUserById(userId);
                         setState(() {
                           isLoading =
                               false; // Masquer l'indicateur de chargement

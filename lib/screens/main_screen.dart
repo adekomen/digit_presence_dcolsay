@@ -4,15 +4,18 @@ import 'dart:convert';
 import '../models/data.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final ApiService apiService;
+  const MainScreen({super.key, required this.apiService});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<MainScreen> createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> {
   String jsonData = ''; // Données JSON à encoder dans le QR code
   bool isLoading = true; // Indicateur de chargement
+
+  String get getJsonData => jsonData;
 
   @override
   void initState() {
@@ -24,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
   // Méthode pour récupérer les données de l'API
   Future<void> fetchData() async {
     try {
-      final response = await ApiService.fetchAllUsers();
+      final response = await widget.apiService.fetchAllUsers();
       print(
           'Réponse reçue : ${response?.toString()}'); // Vérifie ce qui est reçu
 
@@ -58,12 +61,12 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: Center(
         child: isLoading
-            ? const CircularProgressIndicator() // Afficher un indicateur le chargement
+            ? const CircularProgressIndicator() // Affiche un indicateur le chargement
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   QrImageView(
-                    data: jsonData, // Utiliser les données JSON
+                    data: jsonData,
                     version: QrVersions.auto,
                     size: 200.0,
                     embeddedImage: const AssetImage('assets/dcolsay_img.jpg'),

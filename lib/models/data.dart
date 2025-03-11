@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 const String apiUrl = 'http://localhost:8000/api';
 
 class ApiService {
-  // Méthode pour récupérer tous les utilisateurs
-  static Future<List<Map<String, dynamic>>?> fetchAllUsers() async {
+  
+  Future<List<Map<String, dynamic>>?> fetchAllUsers() async {
     try {
       final response = await http.get(Uri.parse('$apiUrl/registers'));
       if (response.statusCode == 200) {
@@ -21,7 +21,7 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>?> fetchUserById(String userId) async {
+  Future<Map<String, dynamic>?> fetchUserById(String userId) async {
     try {
       final response = await http
           .get(Uri.parse('$apiUrl/registers/$userId'));
@@ -41,7 +41,7 @@ class ApiService {
   }
 
   // Méthode pour valider les données scannées via l'API
-  static Future<Map<String, dynamic>?> validateQRCode(String? code) async {
+  Future<Map<String, dynamic>?> validateQRCode(String? code) async {
     if (code == null) return null;
 
     try {
