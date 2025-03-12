@@ -24,7 +24,8 @@ class _MainScreenState extends State<MainScreen> {
   // Méthode pour récupérer les données de l'API
   Future<void> fetchData() async {
     try {
-      final response = await ApiService.fetchAllUsers();
+      final apiService = ApiService();
+      final response = await apiService.fetchAllUsers();
       print(
           'Réponse reçue : ${response?.toString()}'); // Vérifie ce qui est reçu
 

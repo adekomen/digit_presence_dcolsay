@@ -44,7 +44,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         });
 
                         // Vérifier si l'ID existe dans la base de données
-                        final user = await ApiService.fetchUserById(userId);
+                        final apiService = ApiService();
+                        final user = await apiService.fetchUserById(userId);
                         setState(() {
                           isLoading =
                               false; // Masquer l'indicateur de chargement
@@ -54,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           // Naviguer vers le scanner avec l'ID de l'utilisateur
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => QRScanner(userId: userId),
+                              builder: (context) => QRScanner(userId: userId, apiService: apiService),
                             ),
                           );
                         } else {

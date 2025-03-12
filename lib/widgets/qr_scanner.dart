@@ -8,14 +8,15 @@ import '../models/data.dart';
 
 class QRScanner extends StatefulWidget {
   final String userId;
+  final ApiService apiService;
 
-  const QRScanner({super.key, required this.userId});
+  const QRScanner({super.key, required this.userId, required this.apiService});
 
   @override
-  State<QRScanner> createState() => _QRScannerState();
+  State<QRScanner> createState() => QRScannerState();
 }
 
-class _QRScannerState extends State<QRScanner> {
+class QRScannerState extends State<QRScanner> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -127,7 +128,7 @@ class _QRScannerState extends State<QRScanner> {
         : 300.0;
     return QRView(
       key: qrKey,
-      onQRViewCreated: _onQRViewCreated,
+      onQRViewCreated: onQRViewCreated,
       overlay: QrScannerOverlayShape(
           borderColor: Colors.red,
           borderRadius: 10,
@@ -138,7 +139,7 @@ class _QRScannerState extends State<QRScanner> {
     );
   }
 
-  void _onQRViewCreated(QRViewController controller) {
+  void onQRViewCreated(QRViewController controller) {
     setState(() {
       this.controller = controller;
     });
@@ -157,7 +158,8 @@ class _QRScannerState extends State<QRScanner> {
 
       try {
         // Valider les données scannées via l'API
-        final responseData = await ApiService.validateQRCode(scanData.code);
+        final apiService = ApiService();
+        final responseData = await apiService.validateQRCode(scanData.code);
         log('API Response: $responseData');
 
         if (responseData != null && responseData['valid'] == true) {
