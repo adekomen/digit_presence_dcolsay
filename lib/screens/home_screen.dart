@@ -1,6 +1,7 @@
 import 'package:digit_presence/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import '../models/data.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -81,8 +82,10 @@ class HomeScreen extends StatelessWidget {
                   // Bouton pour générer un QR code
                   ElevatedButton(
                     onPressed: () {
+                      final apiService = ApiService();
                       Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const MainScreen(),
+                        builder: (context) =>
+                            MainScreen(apiService: apiService),
                       ));
                     },
                     style: ElevatedButton.styleFrom(
