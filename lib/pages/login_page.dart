@@ -3,16 +3,54 @@ import 'package:digit_presence/components/my_button.dart';
 import 'package:digit_presence/components/my_textfield.dart';
 import 'package:digit_presence/components/square_tile.dart';
 import '../screens/home_screen.dart';
+import '../models/api_client.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
 
-  // text editing controllers
-  final usernameController = TextEditingController();
+  final ApiClient _apiClient = ApiClient();
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  // sign user in method
-  void signUserIn() {}
+  void signUserIn(BuildContext context) async {
+    try {
+      final response = await _apiClient.login(
+        emailController.text.trim(),
+        passwordController.text.trim(),
+      );
+
+      if (response['access_token'] != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(),
+          ),
+        );
+      } else {
+        _showErrorDialog(
+          context,
+          response['description'] ?? 'Invalid email or password',
+        );
+      }
+    } catch (e) {
+      _showErrorDialog(context, 'Connection error. Please try again.');
+    }
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Login Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,15 +63,11 @@ class LoginPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 50),
-
-                // logo
-                const Icon(
-                  Icons.lock,
-                  size: 100,
+                Image.asset(
+                  'assets/dcolsay_img.jpg',
+                  height: 100,
                 ),
-
                 const SizedBox(height: 50),
-
                 Text(
                   'Bienvenue à toi, tu nous as manqué !❤❤😘',
                   style: TextStyle(
@@ -41,28 +75,19 @@ class LoginPage extends StatelessWidget {
                     fontSize: 16,
                   ),
                 ),
-
                 const SizedBox(height: 25),
-
-                // username textfield
                 MyTextField(
-                  controller: usernameController,
-                  hintText: 'Username',
+                  controller: emailController,
+                  hintText: 'Email',
                   obscureText: false,
                 ),
-
                 const SizedBox(height: 10),
-
-                // password textfield
                 MyTextField(
                   controller: passwordController,
                   hintText: 'Password',
                   obscureText: true,
                 ),
-
                 const SizedBox(height: 10),
-
-                // forgot password?
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
@@ -75,19 +100,11 @@ class LoginPage extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 25),
-
-                // sign in button
-                MyButton(onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const HomeScreen(),
-                  ));
-                }),
-
+                MyButton(
+                  onPressed: () => signUserIn(context),
+                ),
                 const SizedBox(height: 50),
-
-                // or continue with
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
@@ -114,26 +131,16 @@ class LoginPage extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 30),
-
-                // google + apple sign in buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
-                    // google button
                     SquareTile(imagePath: 'lib/images/google.png'),
-
                     SizedBox(width: 25),
-
-                    // apple button
-                    SquareTile(imagePath: 'lib/images/apple.png')
+                    SquareTile(imagePath: 'lib/images/apple.png'),
                   ],
                 ),
-
                 const SizedBox(height: 20),
-
-                // not a member? register now
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -150,7 +157,7 @@ class LoginPage extends StatelessWidget {
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),

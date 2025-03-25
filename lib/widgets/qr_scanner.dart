@@ -203,6 +203,7 @@ class QRScannerState extends State<QRScanner> {
 
   @override
   void dispose() {
+    // ignore: deprecated_member_use
     controller?.dispose();
     super.dispose();
   }
