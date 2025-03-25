@@ -7,10 +7,9 @@ import '../screens/result_screen.dart';
 import '../models/data.dart';
 
 class QRScanner extends StatefulWidget {
-  final String userId;
   final ApiService apiService;
 
-  const QRScanner({super.key, required this.userId, required this.apiService});
+  const QRScanner({super.key, required this.apiService});
 
   @override
   State<QRScanner> createState() => QRScannerState();

@@ -1,113 +1,60 @@
-import 'package:digit_presence/screens/main_screen.dart';
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
+import '../widgets/qr_scanner.dart';
+import 'history_screen.dart';
+import 'home_content.dart';
+import 'profile_screen.dart';
 import '../models/data.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  HomeScreenState createState() => HomeScreenState();
+}
+
+class HomeScreenState extends State<HomeScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    const HomeContent(),  // Section d'accueil intégrée
+    QRScanner(apiService: ApiService()), // Scanner
+    const HistoryScreen(), // Historique des scans
+    const ProfileScreen(), // Profil utilisateur
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Digit Presence DCOLSAY'),
-        backgroundColor: Colors.blue,
-        elevation: 10,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/back_img.jpg'),
-            fit: BoxFit.cover,
-            alignment: Alignment.center,
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.blue.shade800,
+        unselectedItemColor: Colors.grey,
+        showUnselectedLabels: true,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Accueil",
           ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            // Permet de faire défiler le contenu sur les petits écrans
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Image.asset(
-                    'assets/dcolsay_img.jpg',
-                    height: 150,
-                  ),
-                  const SizedBox(height: 20),
-                  // Texte de bienvenue
-                  const Text(
-                    'Bienvenue sur Digit Presence DCOLSAY',
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 10),
-                  // Texte d'instruction
-                  const Text(
-                    'Scannez le code QR pour enregistrer votre présence ou votre départ',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 30),
-                  // Bouton pour scanner le QR code
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
-                      ));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.blue.shade800,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 50, vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      elevation: 5,
-                    ),
-                    child: const Text(
-                      'SCANNER ICI',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Bouton pour générer un QR code
-                  ElevatedButton(
-                    onPressed: () {
-                      final apiService = ApiService();
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) =>
-                            MainScreen(apiService: apiService),
-                      ));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.blue.shade800,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 50, vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      elevation: 5,
-                    ),
-                    child: const Text(
-                      'GÉNÉRER UN QR CODE',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code_scanner),
+            label: "Scanner",
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: "Historique",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: "Profil",
+          ),
+        ],
       ),
     );
   }
