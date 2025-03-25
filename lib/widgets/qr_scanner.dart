@@ -158,8 +158,6 @@ class QRScannerState extends State<QRScanner> {
 
       try {
         final apiService = ApiService();
-        // Valider les données scannées via l'API
-        final apiService = ApiService();
         final responseData = await apiService.validateQRCode(scanData.code);
         log('API Response: $responseData');
 

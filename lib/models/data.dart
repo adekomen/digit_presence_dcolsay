@@ -1,16 +1,19 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-const String apiUrl = 'http://localhost:8000/api';
+//const String apiUrl = 'http://localhost:8000/api';
+const String apiUrl = 'http://127.0.0.1:8000/api';
 
 class ApiService {
   // Méthode pour récupérer tous les utilisateurs
-   Future<List<Map<String, dynamic>>?> fetchAllUsers() async {
+  Future<List<Map<String, dynamic>>?> fetchAllUsers() async {
     try {
       final response = await http.get(Uri.parse('$apiUrl/registers'));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        return data.map((registers) => registers as Map<String, dynamic>).toList();
+        return data
+            .map((registers) => registers as Map<String, dynamic>)
+            .toList();
       } else {
         print('Erreur de réponse : ${response.statusCode}');
         return null;
@@ -21,10 +24,9 @@ class ApiService {
     }
   }
 
-   Future<Map<String, dynamic>?> fetchUserById(String userId) async {
+  Future<Map<String, dynamic>?> fetchUserById(String userId) async {
     try {
-      final response = await http
-          .get(Uri.parse('$apiUrl/registers/$userId'));
+      final response = await http.get(Uri.parse('$apiUrl/registers/$userId'));
       if (response.statusCode == 200) {
         return jsonDecode(
             response.body); // Retourner les informations de l'utilisateur
@@ -41,7 +43,7 @@ class ApiService {
   }
 
   // Méthode pour valider les données scannées via l'API
-   Future<Map<String, dynamic>?> validateQRCode(String? code) async {
+  Future<Map<String, dynamic>?> validateQRCode(String? code) async {
     if (code == null) return null;
 
     try {

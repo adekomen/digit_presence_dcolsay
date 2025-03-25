@@ -33,10 +33,9 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 20),
             isLoading
-                ? const CircularProgressIndicator() // Afficher un indicateur de chargement
+                ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: () async {
-                      final apiService = ApiService();
                       final userId = _userIdController.text.trim();
                       if (userId.isNotEmpty) {
                         setState(() {
@@ -56,7 +55,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           // Naviguer vers le scanner avec l'ID de l'utilisateur
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => QRScanner(userId: userId, apiService: apiService),
+                              builder: (context) => QRScanner(
+                                  userId: userId, apiService: apiService),
                             ),
                           );
                         } else {
