@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 
-class HomeContent extends StatelessWidget {
-  const HomeContent({super.key});
+class HomeContent extends StatefulWidget {
+  final Function(int) onTabSelected;
+  const HomeContent({super.key, required this.onTabSelected});
 
+  @override
+  _HomeContentState createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,7 +20,7 @@ class HomeContent extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.home, size: 100, color: Colors.blue),
+            const Icon(Icons.sentiment_satisfied_alt_rounded, size: 150, color: Colors.blue),
             const SizedBox(height: 20),
             const Text(
               "Bienvenue !",
@@ -29,7 +35,7 @@ class HomeContent extends StatelessWidget {
             const SizedBox(height: 30),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.pushNamed(context, '/scanner');
+                widget.onTabSelected(1); // Aller à l'onglet scanner
               },
               icon: const Icon(Icons.qr_code_scanner),
               label: const Text("Scanner un QR Code"),

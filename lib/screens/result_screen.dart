@@ -57,10 +57,23 @@ class ResultScreen extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 40),
-              // Bouton de retour à l'accueil
+              // Bouton de retour à l'accueil ou à l'interface de scan
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  if (isValid) {
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/',
+                      (route) => false,
+                    );
+                  } else {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    } else {
+                      print("Impossible de revenir en arrière !");
+                    }
+
+                    //Navigator.of(context).pushReplacementNamed('MaterialPageRoute(builder: (context) => const QRScanner(apiService: ApiService())),');
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
@@ -72,7 +85,7 @@ class ResultScreen extends StatelessWidget {
                   ),
                   elevation: 5,
                 ),
-                child: const Text('Retour à l\'accueil'),
+                child: Text(isValid ? 'Retour à l\'accueil' : 'Réessayer'),
               ),
             ],
           ),

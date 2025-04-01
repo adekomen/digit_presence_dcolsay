@@ -32,4 +32,6 @@ class MyButton extends StatelessWidget {
       ),
     );
   }
+
+  static icon({required Null Function() onTap, required Icon icon, required Text label}) {}
 }

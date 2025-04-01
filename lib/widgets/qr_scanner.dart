@@ -161,7 +161,7 @@ class QRScannerState extends State<QRScanner> {
         log('API Response: $responseData');
 
         if (responseData != null && responseData['valid'] == true) {
-          Navigator.of(context).pushReplacement(
+          Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => ResultScreen(
                 isValid: true,
@@ -171,7 +171,7 @@ class QRScannerState extends State<QRScanner> {
             ),
           );
         } else {
-          Navigator.of(context).pushReplacement(
+          Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const ResultScreen(isValid: false),
             ),
