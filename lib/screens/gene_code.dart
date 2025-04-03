@@ -3,15 +3,16 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:convert';
 import '../models/data.dart';
 
-class MainScreen extends StatefulWidget {
+
+class GeneCode extends StatefulWidget {
   final ApiService apiService;
-  const MainScreen({super.key, required this.apiService});
+  const GeneCode({super.key, required this.apiService});
 
   @override
-  State<MainScreen> createState() => MainScreenState();
+  State<GeneCode> createState() => GeneCodeState();
 }
 
-class MainScreenState extends State<MainScreen> {
+class GeneCodeState extends State<GeneCode> {
   String jsonData = ''; // Données JSON à encoder dans le QR code
   bool isLoading = true; // Indicateur de chargement
 
