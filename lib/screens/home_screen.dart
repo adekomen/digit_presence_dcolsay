@@ -15,6 +15,19 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
+  // Defining Particles for animation.
+ParticleOptions particles = const ParticleOptions(
+    baseColor: Colors.cyan,
+    spawnOpacity: 0.0,
+    opacityChangeRate: 0.25,
+    minOpacity: 0.1,
+    maxOpacity: 0.4,
+    particleCount: 70,
+    spawnMaxRadius: 15.0,
+    spawnMaxSpeed: 100.0,
+    spawnMinSpeed: 30,
+    spawnMinRadius: 7.0,
+  );
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
@@ -24,10 +37,12 @@ class HomeScreenState extends State<HomeScreen> {
     const ProfileScreen(), // Profil utilisateur
     const MainScreen(), //generer un code
   ];
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

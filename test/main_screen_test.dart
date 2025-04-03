@@ -5,7 +5,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-import 'package:digit_presence/screens/main_screen.dart';
+import 'package:digit_presence/screens/gene_code.dart';
 import 'package:digit_presence/models/data.dart';
 import 'main_screen_test.mocks.dart';
 
