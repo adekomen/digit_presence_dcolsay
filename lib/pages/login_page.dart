@@ -1,55 +1,81 @@
+// lib/pages/login_page.dart
 import 'package:flutter/material.dart';
 import 'package:digit_presence/components/my_button.dart';
 import 'package:digit_presence/components/my_textfield.dart';
 import 'package:digit_presence/components/square_tile.dart';
 import '../screens/home_screen.dart';
-import '../models/api_client.dart';
+import '../models/auth_service.dart';
+import 'forgot_password_page.dart';
 
-class LoginPage extends StatelessWidget {
-  LoginPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
-  final ApiClient _apiClient = ApiClient();
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  // text editing controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool _isLoading = false;
+  String? _errorMessage;
 
-  void signUserIn(BuildContext context) async {
-    try {
-      final response = await _apiClient.login(
-        emailController.text.trim(),
-        passwordController.text.trim(),
-      );
+  // Instance du service d'authentification
+  final AuthService _authService = AuthService();
 
-      if (response['access_token'] != null) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const HomeScreen(),
-          ),
-        );
-      } else {
-        _showErrorDialog(
-          context,
-          response['description'] ?? 'Invalid email or password',
-        );
+  @override
+  void initState() {
+    super.initState();
+    _checkIfAlreadyLoggedIn();
+  }
+
+  // Vérifier si l'utilisateur est déjà connecté
+  Future<void> _checkIfAlreadyLoggedIn() async {
+    final isLoggedIn = await _authService.isLoggedIn();
+    if (isLoggedIn) {
+      // Rediriger vers l'écran d'accueil si déjà connecté
+      if (mounted) {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => const HomeScreen(),
+        ));
       }
-    } catch (e) {
-      _showErrorDialog(context, 'Connection error. Please try again.');
     }
   }
 
-  void _showErrorDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Login Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            child: const Text('OK'),
-            onPressed: () => Navigator.of(ctx).pop(),
-          ),
-        ],
-      ),
+  // Méthode de connexion
+  void signUserIn() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final result = await _authService.login(
+      emailController.text,
+      passwordController.text,
     );
+
+    if (result != null) {
+      // Connexion réussie
+      if (mounted) {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => const HomeScreen(),
+        ));
+      }
+    } else {
+      // Échec de la connexion
+      setState(() {
+        _errorMessage = "Email ou mot de passe incorrect";
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Naviguer vers la page de récupération de mot de passe
+  void _navigateToForgotPassword() {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => ForgotPasswordPage(email: emailController.text),
+    ));
   }
 
   @override
@@ -63,11 +89,15 @@ class LoginPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 50),
-                Image.asset(
-                  'assets/dcolsay_img.jpg',
-                  height: 100,
+
+                // logo
+                const Icon(
+                  Icons.lock,
+                  size: 100,
                 ),
+
                 const SizedBox(height: 50),
+
                 Text(
                   'Bienvenue à toi, tu nous as manqué !❤❤😘',
                   style: TextStyle(
@@ -75,36 +105,62 @@ class LoginPage extends StatelessWidget {
                     fontSize: 16,
                   ),
                 ),
+
                 const SizedBox(height: 25),
+
+                // email textfield
                 MyTextField(
                   controller: emailController,
                   hintText: 'Email',
                   obscureText: false,
                 ),
+
                 const SizedBox(height: 10),
+
+                // password textfield
                 MyTextField(
                   controller: passwordController,
-                  hintText: 'Password',
+                  hintText: 'Mot de passe',
                   obscureText: true,
                 ),
+
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ],
+
                 const SizedBox(height: 10),
+
+                // forgot password?
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text(
-                        'Forgot Password?',
-                        style: TextStyle(color: Colors.grey[600]),
+                      GestureDetector(
+                        onTap: _navigateToForgotPassword,
+                        child: Text(
+                          'Mot de passe oublié?',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
                       ),
                     ],
                   ),
                 ),
+
                 const SizedBox(height: 25),
-                MyButton(
-                  onPressed: () => signUserIn(context),
-                ),
-                const SizedBox(height: 50),
+
+                // sign in button
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : MyButton(onPressed: signUserIn),
+
+                const SizedBox(height: 30),
+
+                // or continue with
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
@@ -118,7 +174,7 @@ class LoginPage extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
                         child: Text(
-                          'Or continue with',
+                          'Ou continuer avec',
                           style: TextStyle(color: Colors.grey[700]),
                         ),
                       ),
@@ -131,33 +187,49 @@ class LoginPage extends StatelessWidget {
                     ],
                   ),
                 ),
+
                 const SizedBox(height: 30),
+
+                // google + apple sign in buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
+                    // google button
                     SquareTile(imagePath: 'lib/images/google.png'),
+
                     SizedBox(width: 25),
-                    SquareTile(imagePath: 'lib/images/apple.png'),
+
+                    // apple button
+                    SquareTile(imagePath: 'lib/images/apple.png')
                   ],
                 ),
+
                 const SizedBox(height: 20),
+
+                // not a member? register now
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Not a member?',
+                      'Pas encore membre?',
                       style: TextStyle(color: Colors.grey[700]),
                     ),
                     const SizedBox(width: 4),
-                    const Text(
-                      'Register now',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
+                    GestureDetector(
+                      onTap: () {
+                        // Naviguer vers la page d'inscription
+                        // À implémenter
+                      },
+                      child: const Text(
+                        'Inscrivez-vous maintenant',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
-                ),
+                )
               ],
             ),
           ),

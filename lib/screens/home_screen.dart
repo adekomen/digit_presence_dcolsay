@@ -1,9 +1,11 @@
+import 'package:digit_presence/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../widgets/qr_scanner.dart';
 import 'history_screen.dart';
 import 'home_content.dart';
-import 'profile_screen.dart';
-import '../models/data.dart';
+import './profile/profile_screen.dart';
+//import '../models/data.dart';
+import 'main_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,10 +18,11 @@ class HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const HomeContent(),  // Section d'accueil intégrée
+    const HomeContent(), // Section d'accueil intégrée
     QRScanner(apiService: ApiService()), // Scanner
     const HistoryScreen(), // Historique des scans
     const ProfileScreen(), // Profil utilisateur
+    const MainScreen(), //generer un code
   ];
 
   @override
@@ -53,6 +56,10 @@ class HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: "Profil",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code_2_rounded),
+            label: "Gene code",
           ),
         ],
       ),

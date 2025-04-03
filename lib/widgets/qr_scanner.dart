@@ -1,15 +1,15 @@
 import 'dart:developer';
 import 'dart:io';
-
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+//import 'package:digit_presence/models/data.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import '../screens/result_screen.dart';
-import '../models/data.dart';
+import '../services/api_service.dart';
 
 class QRScanner extends StatefulWidget {
-  final ApiService apiService;
-
-  const QRScanner({super.key, required this.apiService});
+  const QRScanner({super.key, required ApiService apiService});
 
   @override
   State<QRScanner> createState() => QRScannerState();
@@ -20,6 +20,7 @@ class QRScannerState extends State<QRScanner> {
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   bool isLoading = false;
+  final ApiService _apiService = ApiService();
 
   @override
   void reassemble() {
@@ -46,45 +47,48 @@ class QRScannerState extends State<QRScanner> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.toggleFlash();
-                              setState(() {});
-                            },
-                            child: FutureBuilder(
-                              future: controller?.getFlashStatus(),
-                              builder: (context, snapshot) {
-                                return Text('Flash: ${snapshot.data}');
+                  if (isLoading)
+                    const CircularProgressIndicator()
+                  else
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          margin: const EdgeInsets.all(8),
+                          child: ElevatedButton(
+                              onPressed: () async {
+                                await controller?.toggleFlash();
+                                setState(() {});
                               },
-                            )),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.flipCamera();
-                              setState(() {});
-                            },
-                            child: FutureBuilder(
-                              future: controller?.getCameraInfo(),
-                              builder: (context, snapshot) {
-                                if (snapshot.data != null) {
-                                  return Text(
-                                      'Camera facing ${snapshot.data!.name}');
-                                } else {
-                                  return const Text('loading');
-                                }
+                              child: FutureBuilder(
+                                future: controller?.getFlashStatus(),
+                                builder: (context, snapshot) {
+                                  return Text('Flash: ${snapshot.data}');
+                                },
+                              )),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.all(8),
+                          child: ElevatedButton(
+                              onPressed: () async {
+                                await controller?.flipCamera();
+                                setState(() {});
                               },
-                            )),
-                      )
-                    ],
-                  ),
+                              child: FutureBuilder(
+                                future: controller?.getCameraInfo(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.data != null) {
+                                    return Text(
+                                        'Camera facing ${snapshot.data!.name}');
+                                  } else {
+                                    return const Text('loading');
+                                  }
+                                },
+                              )),
+                        )
+                      ],
+                    ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -127,7 +131,7 @@ class QRScannerState extends State<QRScanner> {
         : 300.0;
     return QRView(
       key: qrKey,
-      onQRViewCreated: onQRViewCreated,
+      onQRViewCreated: _onQRViewCreated,
       overlay: QrScannerOverlayShape(
           borderColor: Colors.red,
           borderRadius: 10,
@@ -138,71 +142,114 @@ class QRScannerState extends State<QRScanner> {
     );
   }
 
-  void onQRViewCreated(QRViewController controller) {
+  void _onQRViewCreated(QRViewController controller) {
     setState(() {
       this.controller = controller;
     });
 
     controller.scannedDataStream.listen((scanData) async {
-      setState(() {
-        result = scanData;
-      });
+      // Éviter les scans multiples
+      if (isLoading) return;
 
       // Arrêter le scanner après le scan
       controller.pauseCamera();
 
       setState(() {
+        result = scanData;
         isLoading = true; // Afficher l'indicateur de chargement
       });
 
       try {
-        final apiService = ApiService();
-        final responseData = await apiService.validateQRCode(scanData.code);
-        log('API Response: $responseData');
+        // Décoder les données QR
+        final qrContent = scanData.code;
+        if (qrContent == null || qrContent.isEmpty) {
+          _showError("QR Code vide ou invalide");
+          return;
+        }
 
-        if (responseData != null && responseData['valid'] == true) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => ResultScreen(
-                isValid: true,
-                userName: responseData['user']['lastname'],
-                userEmail: responseData['user']['email'],
-              ),
-            ),
-          );
-        } else {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const ResultScreen(isValid: false),
-            ),
-          );
+        // Vérifier si le contenu est du JSON valide
+        try {
+          final qrData = json.decode(qrContent);
+
+          // Vérifier la signature de l'application
+          if (qrData['app_signature'] != null &&
+              qrData['app_signature'].toString().startsWith('DigiPresence_')) {
+            // Vérifier la validité du hash localement
+            final originalHash = qrData['hash'];
+
+            // Créer une copie pour vérification sans modifier l'original
+            final qrDataForVerification = Map<String, dynamic>.from(qrData);
+            qrDataForVerification.remove('hash');
+            final dataToHash = qrDataForVerification.toString();
+            final calculatedHash =
+                sha256.convert(utf8.encode(dataToHash)).toString();
+
+            if (originalHash == calculatedHash) {
+              // Vérifier avec l'API
+              final response = await _apiService.verifyQrCode(qrData);
+
+              if (response['success']) {
+                final userData = response['data']['user'];
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => ResultScreen(
+                      isValid: true,
+                      userName: userData['lastname'] ?? '',
+                      userEmail: userData['email'] ?? '',
+                    ),
+                  ),
+                );
+              } else {
+                _showError(response['message'] ??
+                    "Erreur de validation avec le serveur");
+              }
+            } else {
+              _showError("QR Code non valide (hash incorrect)");
+            }
+          } else {
+            _showError("QR Code non reconnu par l'application");
+          }
+        } catch (e) {
+          log('Erreur lors du décodage du QR code: $e');
+          _showError("Format de QR Code invalide");
         }
       } catch (e) {
-        log('Error validating QR code: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Erreur lors de la validation du QR code')),
-        );
+        log('Erreur lors de la validation du QR code: $e');
+        _showError("Une erreur s'est produite");
       } finally {
         setState(() {
           isLoading = false; // Masquer l'indicateur de chargement
         });
+        await Future.delayed(const Duration(seconds: 3));
+        if (mounted) {
+          controller.resumeCamera();
+        }
       }
     });
+  }
+
+  void _showError(String message) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => ResultScreen(
+          isValid: false,
+          errorMessage: message,
+        ),
+      ),
+    );
   }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
     log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
     if (!p) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('no Permission')),
+        const SnackBar(content: Text('Permission de caméra non accordée')),
       );
     }
   }
 
   @override
   void dispose() {
-    // ignore: deprecated_member_use
     controller?.dispose();
     super.dispose();
   }
