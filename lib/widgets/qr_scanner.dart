@@ -2,14 +2,15 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
-//import 'package:digit_presence/models/data.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import '../screens/result_screen.dart';
 import '../services/api_service.dart';
 
 class QRScanner extends StatefulWidget {
-  const QRScanner({super.key, required ApiService apiService});
+  final ApiService apiService;
+
+  const QRScanner({super.key, required this.apiService});
 
   @override
   State<QRScanner> createState() => QRScannerState();
@@ -20,7 +21,6 @@ class QRScannerState extends State<QRScanner> {
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   bool isLoading = false;
-  final ApiService _apiService = ApiService();
 
   @override
   void reassemble() {
@@ -186,9 +186,10 @@ class QRScannerState extends State<QRScanner> {
 
             if (originalHash == calculatedHash) {
               // Vérifier avec l'API
-              final response = await _apiService.verifyQrCode(qrData);
+              final response =
+                  await widget.apiService.validateQRCode(qrContent);
 
-              if (response['success']) {
+              if (response != null && response['success'] == true) {
                 final userData = response['data']['user'];
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
@@ -200,7 +201,7 @@ class QRScannerState extends State<QRScanner> {
                   ),
                 );
               } else {
-                _showError(response['message'] ??
+                _showError(response?['message'] ??
                     "Erreur de validation avec le serveur");
               }
             } else {

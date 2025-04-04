@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:digit_presence/components/my_textfield.dart';
-import 'package:digit_presence/models/auth_service.dart';
+import 'package:digit_presence/services/auth_service.dart';
 import 'login_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -33,7 +33,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   // Demander un code OTP
   Future<void> _requestOtp() async {
-    if (_emailController.text.isEmpty) {
+    if (_emailController.text.trim().isEmpty) {
       setState(() {
         _errorMessage = "Veuillez entrer votre email";
       });
@@ -46,22 +46,31 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       _successMessage = null;
     });
 
-    final success = await _authService.requestOtp(_emailController.text);
+    try {
+      final success =
+          await _authService.requestOtp(_emailController.text.trim());
 
-    setState(() {
-      _isLoading = false;
-      if (success) {
-        _otpSent = true;
-        _successMessage = "Un code de vérification a été envoyé à votre email";
-      } else {
-        _errorMessage = "Impossible d'envoyer le code. Vérifiez votre email";
-      }
-    });
+      setState(() {
+        _isLoading = false;
+        if (success) {
+          _otpSent = true;
+          _successMessage =
+              "Un code de vérification a été envoyé à votre email";
+        } else {
+          _errorMessage = "Impossible d'envoyer le code. Vérifiez votre email";
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Erreur lors de l'envoi du code: $e";
+      });
+    }
   }
 
   // Vérifier le code OTP
   Future<void> _verifyOtp() async {
-    if (_otpController.text.isEmpty) {
+    if (_otpController.text.trim().isEmpty) {
       setState(() {
         _errorMessage = "Veuillez entrer le code de vérification";
       });
@@ -74,22 +83,30 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       _successMessage = null;
     });
 
-    final success = await _authService.verifyOtp(_emailController.text, _otpController.text);
+    try {
+      final success = await _authService.verifyOtp(
+          _emailController.text.trim(), _otpController.text.trim());
 
-    setState(() {
-      _isLoading = false;
-      if (success) {
-        _otpVerified = true;
-        _successMessage = "Code vérifié avec succès";
-      } else {
-        _errorMessage = "Code de vérification invalide ou expiré";
-      }
-    });
+      setState(() {
+        _isLoading = false;
+        if (success) {
+          _otpVerified = true;
+          _successMessage = "Code vérifié avec succès";
+        } else {
+          _errorMessage = "Code de vérification invalide ou expiré";
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Erreur lors de la vérification du code: $e";
+      });
+    }
   }
 
   // Réinitialiser le mot de passe
   Future<void> _resetPassword() async {
-    if (_passwordController.text.isEmpty) {
+    if (_passwordController.text.trim().isEmpty) {
       setState(() {
         _errorMessage = "Veuillez entrer un nouveau mot de passe";
       });
@@ -109,28 +126,35 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       _successMessage = null;
     });
 
-    final success = await _authService.resetPassword(
-      _emailController.text,
-      _otpController.text,
-      _passwordController.text,
-    );
+    try {
+      final success = await _authService.resetPassword(
+        _emailController.text.trim(),
+        _otpController.text.trim(),
+        _passwordController.text.trim(),
+      );
 
-    setState(() {
-      _isLoading = false;
-      if (success) {
-        _successMessage = "Mot de passe réinitialisé avec succès";
-        // Rediriger vers la page de connexion après quelques secondes
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (context) => const LoginPage(),
-            ));
-          }
-        });
-      } else {
-        _errorMessage = "Erreur lors de la réinitialisation du mot de passe";
-      }
-    });
+      setState(() {
+        _isLoading = false;
+        if (success) {
+          _successMessage = "Mot de passe réinitialisé avec succès";
+          // Rediriger vers la page de connexion après quelques secondes
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (context) => const LoginPage(),
+              ));
+            }
+          });
+        } else {
+          _errorMessage = "Erreur lors de la réinitialisation du mot de passe";
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Erreur lors de la réinitialisation: $e";
+      });
+    }
   }
 
   @override
@@ -146,7 +170,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
-              
+
               // Étape 1: Demander un code OTP
               if (!_otpSent) ...[
                 const Text(
@@ -167,7 +191,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         child: const Text('Envoyer le code'),
                       ),
               ],
-              
+
               // Étape 2: Vérifier le code OTP
               if (_otpSent && !_otpVerified) ...[
                 const Text(
@@ -192,7 +216,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   child: const Text("Renvoyer le code"),
                 ),
               ],
-              
+
               // Étape 3: Réinitialiser le mot de passe
               if (_otpVerified) ...[
                 const Text(
@@ -219,7 +243,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         child: const Text('Réinitialiser le mot de passe'),
                       ),
               ],
-              
+
               // Messages d'erreur ou de succès
               if (_errorMessage != null) ...[
                 const SizedBox(height: 16),
@@ -229,7 +253,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   textAlign: TextAlign.center,
                 ),
               ],
-              
+
               if (_successMessage != null) ...[
                 const SizedBox(height: 16),
                 Text(

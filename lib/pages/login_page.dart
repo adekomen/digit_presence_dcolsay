@@ -1,10 +1,9 @@
-// lib/pages/login_page.dart
 import 'package:flutter/material.dart';
 import 'package:digit_presence/components/my_button.dart';
 import 'package:digit_presence/components/my_textfield.dart';
 import 'package:digit_presence/components/square_tile.dart';
 import '../screens/home_screen.dart';
-import '../models/auth_service.dart';
+import '../services/auth_service.dart';
 import 'forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -33,39 +32,52 @@ class _LoginPageState extends State<LoginPage> {
   // Vérifier si l'utilisateur est déjà connecté
   Future<void> _checkIfAlreadyLoggedIn() async {
     final isLoggedIn = await _authService.isLoggedIn();
-    if (isLoggedIn) {
+    if (isLoggedIn && mounted) {
       // Rediriger vers l'écran d'accueil si déjà connecté
-      if (mounted) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => const HomeScreen(),
-        ));
-      }
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => const HomeScreen(),
+      ));
     }
   }
 
   // Méthode de connexion
-  void signUserIn() async {
+  Future<void> signUserIn() async {
+    if (emailController.text.trim().isEmpty ||
+        passwordController.text.trim().isEmpty) {
+      setState(() {
+        _errorMessage = "Veuillez remplir tous les champs";
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
-    final result = await _authService.login(
-      emailController.text,
-      passwordController.text,
-    );
+    try {
+      final result = await _authService.login(
+        emailController.text.trim(),
+        passwordController.text.trim(),
+      );
 
-    if (result != null) {
-      // Connexion réussie
-      if (mounted) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => const HomeScreen(),
-        ));
+      if (result['success']) {
+        // Connexion réussie
+        if (mounted) {
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => const HomeScreen(),
+          ));
+        }
+      } else {
+        // Échec de la connexion
+        setState(() {
+          _errorMessage = result['message'] ?? "Échec de la connexion";
+          _isLoading = false;
+        });
       }
-    } else {
-      // Échec de la connexion
+    } catch (e) {
       setState(() {
-        _errorMessage = "Email ou mot de passe incorrect";
+        _errorMessage = "Erreur de connexion: $e";
         _isLoading = false;
       });
     }
@@ -126,9 +138,13 @@ class _LoginPageState extends State<LoginPage> {
 
                 if (_errorMessage != null) ...[
                   const SizedBox(height: 10),
-                  Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ],
 
@@ -156,7 +172,10 @@ class _LoginPageState extends State<LoginPage> {
                 // sign in button
                 _isLoading
                     ? const CircularProgressIndicator()
-                    : MyButton(onPressed: signUserIn),
+                    : MyButton(
+                        onTap: signUserIn,
+                        text: 'Se connecter', onPressed: () {  },
+                      ),
 
                 const SizedBox(height: 30),
 
@@ -218,7 +237,7 @@ class _LoginPageState extends State<LoginPage> {
                     GestureDetector(
                       onTap: () {
                         // Naviguer vers la page d'inscription
-                        // À implémenter
+                        Navigator.pushNamed(context, '/registers');
                       },
                       child: const Text(
                         'Inscrivez-vous maintenant',

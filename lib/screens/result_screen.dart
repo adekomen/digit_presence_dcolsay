@@ -11,12 +11,12 @@ class ResultScreen extends StatelessWidget {
   final String? errorMessage;
 
   const ResultScreen({
-    Key? key,
+    super.key,
     required this.isValid,
     this.userName,
     this.userEmail,
     this.errorMessage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
