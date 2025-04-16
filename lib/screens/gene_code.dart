@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:convert';
 import 'package:digit_presence/services/api_service.dart';
+import 'package:digit_presence/services/config.dart';
 
 class GeneCode extends StatefulWidget {
   final ApiService apiService;
@@ -12,10 +13,10 @@ class GeneCode extends StatefulWidget {
 }
 
 class GeneCodeState extends State<GeneCode> {
-  String jsonData = ''; // Données JSON à encoder dans le QR code
+  String qrContent = '${ApiConfig.apiUrl}/scan';
   bool isLoading = true; // Indicateur de chargement
 
-  String get getJsonData => jsonData;
+  String get getQrContent => qrContent;
 
   @override
   void initState() {
@@ -27,28 +28,27 @@ class GeneCodeState extends State<GeneCode> {
   // Méthode pour récupérer les données de l'API
   Future<void> fetchData() async {
     try {
-      final apiService = ApiService();
-      final response = await apiService.fetchAllUsers();
-      print(
-          'Réponse reçue : ${response?.toString()}'); // Vérifie ce qui est reçu
+      final response = await widget.apiService.fetchAllUsers();
+      print('Réponse reçue : ${response?.toString()}'); // Vérifie ce qui est reçu
 
       if (response != null && response.isNotEmpty) {
         setState(() {
-          jsonData = jsonEncode(response); // Convertit en JSON
+          // Ajoutez les données JSON comme paramètre de requête
+          final jsonData = Uri.encodeComponent(jsonEncode(response));
+          qrContent = '$qrContent?data=$jsonData'; // Ajoute les données JSON comme paramètre de requête
           isLoading = false;
         });
       } else {
         print('Données vides ou null.');
         setState(() {
-          jsonData =
-              '{"message": "Aucune donnée reçue"}'; // Met un message par défaut
+          qrContent = '$qrContent?message=${Uri.encodeComponent('Aucune donnée reçue')}'; // Met un message par défaut
           isLoading = false;
         });
       }
     } catch (e) {
       print('Erreur : $e');
       setState(() {
-        jsonData = '{"message": "Erreur lors de la récupération"}';
+        qrContent = '$qrContent?message=${Uri.encodeComponent('Erreur lors de la récupération')}'; // Met un message d'erreur
         isLoading = false;
       });
     }
@@ -62,12 +62,12 @@ class GeneCodeState extends State<GeneCode> {
       ),
       body: Center(
         child: isLoading
-            ? const CircularProgressIndicator() // Affiche un indicateur le chargement
+            ? const CircularProgressIndicator() // Affiche un indicateur de chargement
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   QrImageView(
-                    data: jsonData,
+                    data: qrContent,
                     version: QrVersions.auto,
                     size: 200.0,
                     embeddedImage: const AssetImage('assets/dcolsay_img.jpg'),

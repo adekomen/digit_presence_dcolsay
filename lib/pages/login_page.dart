@@ -5,6 +5,7 @@ import 'package:digit_presence/components/square_tile.dart';
 import '../screens/home_screen.dart';
 import '../services/auth_service.dart';
 import 'forgot_password_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -68,6 +69,17 @@ class _LoginPageState extends State<LoginPage> {
 
       // Vérifie si la connexion a réussi
       if (result['success']) {
+        // Stocker le token dans SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        if (result['token'] != null) {
+          await prefs.setString('token', result['token']);
+          print("Token reçu : ${result['token']}");
+        } else {
+          print("Avertissement : Aucun token reçu de l'API.");
+        }
+
+        //await prefs.setString('token', result['token']); // Assurez-vous que 'token' est dans le résultat
+
         // Connexion réussie, navigue vers l'écran d'accueil
         if (mounted) {
           Navigator.of(context).pushReplacement(MaterialPageRoute(

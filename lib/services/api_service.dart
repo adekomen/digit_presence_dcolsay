@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
 import 'package:digit_presence/services/auth_service.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 import 'package:digit_presence/services/config.dart';
 
 class ApiService {
@@ -12,14 +13,8 @@ class ApiService {
 
   // Instance du service d'authentification
   final AuthService _authService = AuthService();
-
-  // En-têtes de base pour les requêtes
-  Map<String, String> _headers() => {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      };
-
-  // En-têtes avec authentication
+  
+  // Méthode pour obtenir les en-têtes avec authentification
   Future<Map<String, String>> _getAuthHeaders() async {
     final token = await _authService.getToken();
     final headers = _headers();
@@ -28,7 +23,50 @@ class ApiService {
     }
     return headers;
   }
-  
+
+  // Méthode pour valider un QR code
+  Future<Map<String, dynamic>?> validateQRCode(String? code) async {
+    if (code == null) {
+      return {'success': false, 'message': 'Code QR invalide'};
+    }
+
+    try {
+      final headers = await _getAuthHeaders();
+      if (!headers.containsKey('Authorization')) {
+        return {'success': false, 'message': 'Utilisateur non authentifié'};
+      }
+
+      final response = await http.post(
+        Uri.parse('${ApiConfig.apiUrl}/validate-qr'),
+        headers: headers,
+        body: jsonEncode({'qrCode': code}),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else if (response.statusCode == 401) {
+        await _authService.logout();
+        return {'success': false, 'message': 'Session expirée'};
+      } else {
+        print('Erreur de réponse : ${response.statusCode}');
+        print('Réponse du serveur : ${response.body}');
+        return {'success': false, 'message': 'Erreur serveur'};
+      }
+    } catch (e) {
+      print('Erreur lors de la validation : $e');
+      return {'success': false, 'message': 'Erreur de réseau'};
+    }
+  }
+
+  //méthode pour obtenir les en-têtes de base
+  Map<String, String> _headers() {
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+  }
+
+
   // ===== UTILISATEURS =====
 
   // Récupérer les données de l'utilisateur connecté
@@ -90,34 +128,6 @@ class ApiService {
   }
 
   // ===== GESTION DES PRÉSENCES =====
-
-  // Valider un QR code
-  Future<Map<String, dynamic>?> validateQRCode(String? code) async {
-    if (code == null) return null;
-
-    try {
-      final headers = await _getAuthHeaders();
-      final response = await http.post(
-        Uri.parse('${ApiConfig.apiUrl}/validate-qr'),
-        headers: headers,
-        body: jsonEncode({'qrCode': code}),
-      );
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else if (response.statusCode == 401) {
-        await _authService.logout();
-        return null;
-      } else {
-        print('Erreur de réponse : ${response.statusCode}');
-        print('Réponse du serveur : ${response.body}');
-        return null;
-      }
-    } catch (e) {
-      print('Erreur lors de la validation : $e');
-      return null;
-    }
-  }
 
   // Enregistrer une présence
   Future<bool> recordPresence(String qrCode) async {

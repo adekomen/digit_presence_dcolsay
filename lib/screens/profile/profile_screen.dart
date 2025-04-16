@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'user_qr_screen.dart';
+import 'package:digit_presence/services/api_service.dart';
+import 'package:digit_presence/screens/gene_code.dart'; 
 
 const String tProfile = "Mon Profil";
 const String tProfileHeading = "Chaboto";
@@ -123,6 +125,18 @@ class ProfileScreen extends StatelessWidget {
                   title: "Information",
                   icon: LineAwesomeIcons.info_solid,
                   onPress: () {}),
+              ProfileMenuWidget(
+                  title: "Générer QR Code",
+                  icon: LineAwesomeIcons.qrcode_solid,
+                  onPress: () {
+                    final apiService = ApiService();
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GeneCode(apiService: apiService),
+                    ),
+                  );
+                  }),
               ProfileMenuWidget(
                   title: "Logout",
                   icon: LineAwesomeIcons.sign_out_alt_solid,
