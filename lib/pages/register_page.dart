@@ -206,8 +206,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   _isLoading
                       ? const CircularProgressIndicator()
                       : MyButton(
-                          onTap: registerUser,
-                          text: "S'inscrire", onPressed: () {  },
+                          onPressed: registerUser,
+                          text: "S'inscrire",
                         ),
 
                   const SizedBox(height: 20),

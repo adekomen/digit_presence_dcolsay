@@ -42,46 +42,57 @@ class _LoginPageState extends State<LoginPage> {
 
   // Méthode de connexion
   Future<void> signUserIn() async {
-    if (emailController.text.trim().isEmpty ||
-        passwordController.text.trim().isEmpty) {
+    // Vérifie si les champs email et mot de passe sont vides
+    if (emailController.text.trim().isEmpty || passwordController.text.trim().isEmpty) {
       setState(() {
         _errorMessage = "Veuillez remplir tous les champs";
       });
+      print("Erreur: Champs vides"); // Message de débogage
       return;
     }
 
+    // Démarre l'état de chargement et réinitialise le message d'erreur
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
+    print("Début de la connexion..."); // Message de débogage
 
     try {
+      // Appelle le service d'authentification pour se connecter
       final result = await _authService.login(
         emailController.text.trim(),
         passwordController.text.trim(),
       );
+      print("Résultat de la connexion: $result"); // Message de débogage
 
+      // Vérifie si la connexion a réussi
       if (result['success']) {
-        // Connexion réussie
+        // Connexion réussie, navigue vers l'écran d'accueil
         if (mounted) {
           Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => const HomeScreen(),
           ));
         }
+        print("Connexion réussie"); // Message de débogage
       } else {
-        // Échec de la connexion
+        // Échec de la connexion, affiche un message d'erreur
         setState(() {
           _errorMessage = result['message'] ?? "Échec de la connexion";
           _isLoading = false;
         });
+        print("Échec de la connexion: $_errorMessage"); // Message de débogage
       }
     } catch (e) {
+      // Gère les exceptions et affiche un message d'erreur
       setState(() {
         _errorMessage = "Erreur de connexion: $e";
         _isLoading = false;
       });
+      print("Exception capturée: $e"); // Message de débogage
     }
   }
+
 
   // Naviguer vers la page de récupération de mot de passe
   void _navigateToForgotPassword() {
@@ -173,8 +184,8 @@ class _LoginPageState extends State<LoginPage> {
                 _isLoading
                     ? const CircularProgressIndicator()
                     : MyButton(
-                        onTap: signUserIn,
-                        text: 'Se connecter', onPressed: () {  },
+                        onPressed: signUserIn,
+                        text: 'Se connecter',
                       ),
 
                 const SizedBox(height: 30),

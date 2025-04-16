@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
-import 'auth_service.dart';
-import 'config.dart';
+import 'package:digit_presence/services/auth_service.dart';
+import 'package:digit_presence/services/config.dart';
 
 class ApiService {
   // Singleton pattern
@@ -28,7 +28,7 @@ class ApiService {
     }
     return headers;
   }
-
+  
   // ===== UTILISATEURS =====
 
   // Récupérer les données de l'utilisateur connecté

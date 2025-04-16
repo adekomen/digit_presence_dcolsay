@@ -5,7 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import '../screens/result_screen.dart';
-import '../services/api_service.dart';
+import 'package:digit_presence/services/api_service.dart';
 
 class QRScanner extends StatefulWidget {
   final ApiService apiService;

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:digit_presence/components/my_textfield.dart';
 import 'package:digit_presence/services/auth_service.dart';
-import 'login_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   final String email;
@@ -47,15 +46,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     });
 
     try {
-      final success =
-          await _authService.requestOtp(_emailController.text.trim());
+      final success = await _authService.requestOtp(_emailController.text.trim());
 
       setState(() {
         _isLoading = false;
         if (success) {
           _otpSent = true;
-          _successMessage =
-              "Un code de vérification a été envoyé à votre email";
+          _successMessage = "Un code de vérification a été envoyé à votre email";
         } else {
           _errorMessage = "Impossible d'envoyer le code. Vérifiez votre email";
         }
@@ -84,12 +81,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     });
 
     try {
-      final success = await _authService.verifyOtp(
+      final result = await _authService.verifyOtp(
           _emailController.text.trim(), _otpController.text.trim());
 
       setState(() {
         _isLoading = false;
-        if (success) {
+        if (result['success'] == true) {
           _otpVerified = true;
           _successMessage = "Code vérifié avec succès";
         } else {
@@ -127,15 +124,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     });
 
     try {
-      final success = await _authService.resetPassword(
-        _emailController.text.trim(),
-        _otpController.text.trim(),
-        _passwordController.text.trim(),
-      );
+      /*final success = await _authService.resetPassword(
+        //email: _emailController.text.trim(),
+        //otp: _otpController.text.trim(),
+        newPassword: _passwordController.text.trim(),
+      );*/
 
-      setState(() {
+      /*setState(() {
         _isLoading = false;
-        if (success) {
+        if (success == true) {
           _successMessage = "Mot de passe réinitialisé avec succès";
           // Rediriger vers la page de connexion après quelques secondes
           Future.delayed(const Duration(seconds: 2), () {
@@ -148,7 +145,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         } else {
           _errorMessage = "Erreur lors de la réinitialisation du mot de passe";
         }
-      });
+      });*/
     } catch (e) {
       setState(() {
         _isLoading = false;

@@ -1,7 +1,7 @@
 class ApiConfig {
   // Configuration dynamique de l'URL de base
   static String getBaseUrl() {
-    return 'http://192.168.1.120:8080/api';
+    return 'https://voidexplorer.alwaysdata.net/digit-presence-lumen/Digit-present-Api/public/api';
   }
 
   // URL de base accessible partout dans l'application
