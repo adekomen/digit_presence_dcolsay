@@ -1,10 +1,6 @@
-//import 'package:digit_presence/models/data.dart';
-import 'package:digit_presence/services/api_service.dart';
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
-import '../widgets/qr_scanner.dart';
 
-class ResultScreen extends StatelessWidget {
+class ResultScreen extends StatefulWidget {
   final bool isValid;
   final String? userName;
   final String? userEmail;
@@ -19,6 +15,11 @@ class ResultScreen extends StatelessWidget {
   });
 
   @override
+  State<ResultScreen> createState() => _ResultScreenState();
+}
+
+class _ResultScreenState extends State<ResultScreen> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -30,21 +31,21 @@ class ResultScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isValid ? Icons.check_circle : Icons.cancel,
-              color: isValid ? Colors.green : Colors.red,
+              widget.isValid ? Icons.check_circle : Icons.cancel,
+              color: widget.isValid ? Colors.green : Colors.red,
               size: 100,
             ),
             const SizedBox(height: 20),
             Text(
-              isValid ? 'QR Code valide' : 'QR Code invalide',
+              widget.isValid ? 'QR Code valide' : 'QR Code invalide',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: isValid ? Colors.green : Colors.red,
+                color: widget.isValid ? Colors.green : Colors.red,
               ),
             ),
             const SizedBox(height: 30),
-            if (isValid && userName != null && userEmail != null) ...[
+            if (widget.isValid && widget.userName != null && widget.userEmail != null) ...[
               Container(
                 padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -56,12 +57,12 @@ class ResultScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'M/Mme: $userName',
+                      'M/Mme: ${widget.userName}',
                       style: const TextStyle(fontSize: 18),
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Email: $userEmail',
+                      'Email: ${widget.userEmail}',
                       style: const TextStyle(fontSize: 18),
                     ),
                     const SizedBox(height: 20),
@@ -79,11 +80,11 @@ class ResultScreen extends StatelessWidget {
                 ),
               ),
             ],
-            if (!isValid) ...[
+            if (!widget.isValid) ...[
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Text(
-                  errorMessage ??
+                  widget.errorMessage ??
                       'Ce QR Code n\'est pas valide pour cette application',
                   style: const TextStyle(fontSize: 16),
                   textAlign: TextAlign.center,
@@ -93,25 +94,18 @@ class ResultScreen extends StatelessWidget {
             const SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {
-                if (isValid) {
-                  // Redirection vers HomeScreen avec MaterialPageRoute
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()),
-                  );
+                if (widget.isValid) {
+                  // Retourner à l'onglet d'accueil (index 0)
+                  Navigator.pop(context, 0);
                 } else {
-                  // Redirection vers QRScanner avec MaterialPageRoute
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => QRScanner(apiService: ApiService())),
-                  );
+                  // Retourner à l'onglet scanner (index 1)
+                  Navigator.pop(context, 1);
                 }
               },
               style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
-              child: Text(isValid ? 'Aller à l\'accueil' : 'Retour au scan',
+              child: Text(widget.isValid ? 'Aller à l\'accueil' : 'Retour au scan',
                   style: const TextStyle(fontSize: 16)),
             ),
           ],

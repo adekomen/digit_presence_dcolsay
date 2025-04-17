@@ -191,7 +191,7 @@ class QRScannerState extends State<QRScanner> {
 
               if (response != null && response['success'] == true) {
                 final userData = response['data']['user'];
-                Navigator.of(context).pushReplacement(
+                Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => ResultScreen(
                       isValid: true,
@@ -230,7 +230,7 @@ class QRScannerState extends State<QRScanner> {
   }
 
   void _showError(String message) {
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ResultScreen(
           isValid: false,

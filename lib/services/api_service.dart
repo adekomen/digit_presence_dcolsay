@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
 import 'package:digit_presence/services/auth_service.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
 import 'package:digit_presence/services/config.dart';
 
 class ApiService {
@@ -145,6 +144,57 @@ class ApiService {
     } catch (e) {
       print('Erreur lors de l\'enregistrement de la présence: $e');
       return false;
+    }
+  }
+
+  //envoyer une requete post lors du scannage
+  Future<Map<String, dynamic>?> postScanData() async {
+    final token = await _authService.getToken();
+
+    if (token == null) {
+      return {
+        "success": false,
+        "message": "Aucun token trouvé. Veuillez vous reconnecter."
+      };
+    }
+
+    final url = Uri.parse('${ApiConfig.apiUrl}/scan');
+    final now = DateTime.now().toIso8601String();
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          "scanned_at": now,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {
+          "success": true,
+          "message": "Scan enregistré avec succès.",
+          "data": data
+        };
+      } else {
+        return {
+          "success": false,
+          "message": data['message'] ?? "Erreur lors de l'envoi du scan",
+          "status": response.statusCode,
+          "response": data
+        };
+      }
+    } catch (e) {
+      return {
+        "success": false,
+        "message": "Erreur réseau: $e",
+      };
     }
   }
 
