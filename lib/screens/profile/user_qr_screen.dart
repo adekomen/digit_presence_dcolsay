@@ -1,4 +1,3 @@
-//import 'package:digit_presence/models/data.dart';
 import 'package:digit_presence/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
@@ -42,12 +41,12 @@ class UserQRScreen extends StatelessWidget {
 
               CircleAvatar(
                 radius: 80,
-                backgroundImage: AssetImage(tProfileImage),
+                backgroundImage: AssetImage(tProfileImageDefault),
               ),
               const SizedBox(height: 16),
 
               Text(
-                tProfileHeading,
+                tProfile,
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -57,7 +56,7 @@ class UserQRScreen extends StatelessWidget {
 
               // QR Code
               QrImageView(
-                data: tProfileHeading,
+                data: tProfile,
                 version: QrVersions.auto,
                 size: 250,
                 gapless: false,
