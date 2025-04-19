@@ -26,44 +26,59 @@ class AuthService {
       };
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-  try {
-    final response = await http.post(
-      Uri.parse('${ApiConfig.apiUrl}/admin/login'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: jsonEncode({
-        'email_utilisateur': email,
-        'mot_de_passe_utilisateur': password,
-      }),
-    );
+    try {
+      print("Tentative de connexion avec email: $email");
+      final response = await http.post(
+        Uri.parse('${ApiConfig.apiUrl}/admin/login'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'email_utilisateur': email,
+          'mot_de_passe_utilisateur': password,
+        }),
+      );
 
-    final data = jsonDecode(response.body);
+      print("Code de statut: ${response.statusCode}");
+      final data = jsonDecode(response.body);
+      print("Réponse API: $data");
 
-    if (response.statusCode == 200 && data['token'] != null) {
-      await _saveToken(data['token']);
+      if (response.statusCode == 200 && data['token'] != null) {
+        print("Token reçu, sauvegarde en cours...");
+        await _saveToken(data['token']);
 
-      // Stocker les infos utilisateur si présentes
-      if (data['user'] != null) {
-        _currentUser = User.fromJson(data['user']);
-        await _saveUserData(_currentUser!);
+        // Vérifier si les données utilisateur sont présentes
+        if (data['admin'] != null) {
+          print("Données utilisateur reçues: ${data['admin']}");
+          try {
+            _currentUser = User.fromJson(data['admin']);
+            print(
+                "Utilisateur créé: ${_currentUser?.firstname} ${_currentUser?.lastname}");
+            await _saveUserData(_currentUser!);
+            print("Données utilisateur sauvegardées dans SharedPreferences");
+          } catch (e) {
+            print("ERREUR lors de la création de l'utilisateur: $e");
+          }
+        } else {
+          print("Aucune donnée utilisateur dans la réponse");
+        }
+
+        return {
+          'success': true,
+          'message': 'Connexion réussie',
+          'data': data,
+        };
       }
 
       return {
-        'success': true,
-        'message': 'Connexion réussie',
-        'data': data,
+        'success': false,
+        'message': data['message'] ?? 'Email ou mot de passe incorrect',
+        'status': response.statusCode,
+        'response': data,
       };
-    }
-
-    return {
-      'success': false,
-      'message': data['message'] ?? 'Email ou mot de passe incorrect',
-      'status': response.statusCode,
-      'response': data,
-    };
-  } catch (e) {
+    } catch (e) {
+      print("Exception lors de la connexion: $e");
       return {
         'success': false,
         'message': 'Erreur de connexion au serveur: $e',
@@ -143,25 +158,45 @@ Future<Map<String, dynamic>> verifyOtp(String email, String otp) async {
 
   // Sauvegarder les données utilisateur
   Future<void> _saveUserData(User user) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userDataKey, jsonEncode(user.toJson()));
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userData = jsonEncode(user.toJson());
+      print("Sauvegarde des données utilisateur: $userData");
+      await prefs.setString(_userDataKey, userData);
+      print("Données utilisateur sauvegardées avec succès");
+    } catch (e) {
+      print("Erreur lors de la sauvegarde des données utilisateur: $e");
+    }
   }
 
   // Vérifier si l'utilisateur est connecté
   Future<bool> isLoggedIn() async {
-    final token = await getToken();
-    final userData = await _getUserData();
+    try {
+      final token = await getToken();
+      print("Token récupéré: ${token != null ? 'Oui' : 'Non'}");
 
-    if (token != null && userData != null) {
-      try {
-        _currentUser = userData;
-        return true;
-      } catch (e) {
-        print('Erreur lors du chargement des données utilisateur: $e');
+      if (token == null) {
+        print("Pas de token, utilisateur non connecté");
         return false;
       }
+
+      final userData = await _getUserData();
+      print(
+          "Données utilisateur récupérées: ${userData != null ? 'Oui' : 'Non'}");
+
+      if (userData != null) {
+        _currentUser = userData;
+        print(
+            "Utilisateur chargé: ${_currentUser?.firstname} ${_currentUser?.lastname}");
+        return true;
+      } else {
+        print("Données utilisateur non trouvées dans SharedPreferences");
+        return false;
+      }
+    } catch (e) {
+      print("Erreur lors de la vérification de connexion: $e");
+      return false;
     }
-    return false;
   }
 
   // Récupérer le token
@@ -172,18 +207,31 @@ Future<Map<String, dynamic>> verifyOtp(String email, String otp) async {
 
   // Récupérer les données utilisateur
   Future<User?> _getUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userData = prefs.getString(_userDataKey);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userData = prefs.getString(_userDataKey);
 
-    if (userData != null) {
-      try {
-        return User.fromJson(jsonDecode(userData));
-      } catch (e) {
-        print('Erreur lors du décodage des données utilisateur: $e');
-        return null;
+      if (userData != null) {
+        print("Données utilisateur brutes trouvées: $userData");
+        try {
+          final user = User.fromJson(jsonDecode(userData));
+          print(
+              "Utilisateur décodé avec succès: ${user.firstname} ${user.lastname}");
+          return user;
+        } catch (e) {
+          print("ERREUR lors du décodage des données utilisateur: $e");
+          // Essai de débogage
+          final Map<String, dynamic> jsonData = jsonDecode(userData);
+          print("Clés disponibles: ${jsonData.keys.toList()}");
+          return null;
+        }
       }
+      print("Aucune donnée utilisateur stockée");
+      return null;
+    } catch (e) {
+      print("Exception dans _getUserData: $e");
+      return null;
     }
-    return null;
   }
 
   // Déconnexion
