@@ -1,7 +1,7 @@
 import 'package:digit_presence/services/api_service.dart';
+import 'package:digit_presence/services/config.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:digit_presence/services/config.dart';
 
 class GeneCode extends StatelessWidget {
   const GeneCode({super.key, required ApiService apiService});
@@ -9,7 +9,7 @@ class GeneCode extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Lien de scan pour le backend
-    final String qrContent = '${ApiConfig.apiUrl}/scan';
+    final String qrContent = '${ApiConfig.apiUrl}/presences';
 
     return Scaffold(
       appBar: AppBar(

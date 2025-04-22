@@ -152,14 +152,17 @@ class ApiService {
     final token = await _authService.getToken();
 
     if (token == null) {
+       print("❌ Aucun token trouvé. L'utilisateur doit se reconnecter.");
       return {
         "success": false,
         "message": "Aucun token trouvé. Veuillez vous reconnecter."
       };
     }
 
-    final url = Uri.parse('${ApiConfig.apiUrl}/scan');
+    final url = Uri.parse('${ApiConfig.apiUrl}/presences');
     final now = DateTime.now().toIso8601String();
+
+    print("📡 Envoi de la requête à $url avec la date $now");
 
     try {
       final response = await http.post(
@@ -177,12 +180,14 @@ class ApiService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        print("✅ Scan enregistré avec succès.");
         return {
           "success": true,
           "message": "Scan enregistré avec succès.",
           "data": data
         };
       } else {
+        print("⚠️ Erreur lors de l'enregistrement du scan : ${data['message']}");
         return {
           "success": false,
           "message": data['message'] ?? "Erreur lors de l'envoi du scan",
@@ -191,6 +196,7 @@ class ApiService {
         };
       }
     } catch (e) {
+      print("❌ Exception capturée : $e");
       return {
         "success": false,
         "message": "Erreur réseau: $e",
