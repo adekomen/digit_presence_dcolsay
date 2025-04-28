@@ -1,4 +1,6 @@
+import 'package:digit_presence/screens/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomeContent extends StatefulWidget {
   final Function(int) onTabSelected;
@@ -15,6 +17,16 @@ class _HomeContentState extends State<HomeContent> {
       appBar: AppBar(
         title: const Text("Digit Presence DCOLSAY"),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: Icon(
+              context.watch<ThemeProvider>().isDarkMode ? Icons.light_mode : Icons.dark_mode,
+            ),
+            onPressed: () {
+              context.read<ThemeProvider>().toggleTheme();
+            },
+          )
+        ],
       ),
       body: Center(
         child: Column(
