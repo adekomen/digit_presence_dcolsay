@@ -11,7 +11,8 @@ import 'user_qr_screen.dart';
 import '../../services/auth_service.dart';
 import '../../services/config.dart';
 import 'package:digit_presence/services/api_service.dart';
-import 'package:digit_presence/screens/gene_code.dart'; 
+import 'package:digit_presence/screens/gene_code.dart';
+import '../../pages/login_page.dart';
 
 // Constants
 const String tProfile = "Mon Profil";
@@ -141,8 +142,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _handleLogout() async {
     try {
       await _authService.logout();
-      // Utiliser Get.offAllNamed pour effacer la pile de navigation
-      Get.offAllNamed('/login');
+
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false // Supprime toutes les routes précédentes
+            );
+      }
     } catch (e) {
       print("Erreur lors de la déconnexion: $e");
       if (mounted) {
@@ -393,11 +399,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onPress: () {
                     final apiService = ApiService();
                     Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => GeneCode(apiService: apiService),
-                    ),
-                  );
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GeneCode(apiService: apiService),
+                      ),
+                    );
                   }),
               ProfileMenuWidget(
                   title: "Déconnexion",
