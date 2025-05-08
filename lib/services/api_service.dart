@@ -10,9 +10,8 @@ class ApiService {
   factory ApiService() => _instance;
   ApiService._internal();
 
-  // Instance du service d'authentification
   final AuthService _authService = AuthService();
-  
+
   // Méthode pour obtenir les en-têtes avec authentification
   Future<Map<String, String>> _getAuthHeaders() async {
     final token = await _authService.getToken();
@@ -22,8 +21,20 @@ class ApiService {
     }
     return headers;
   }
+  Future<String?> getToken() async {
+    return await _authService.getToken();
+  }
 
-  // Méthode pour valider un QR code
+  // En-têtes de base
+  Map<String, String> _headers() {
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+  }
+
+  // ===== VALIDATION DU QR CODE =====
+
   Future<Map<String, dynamic>?> validateQRCode(String? code) async {
     if (code == null) {
       return {'success': false, 'message': 'Code QR invalide'};
@@ -36,7 +47,7 @@ class ApiService {
       }
 
       final response = await http.post(
-        Uri.parse('${ApiConfig.apiUrl}/validate-qr'),
+        Uri.parse('${ApiConfig.apiUrl}/presences'),
         headers: headers,
         body: jsonEncode({'qrCode': code}),
       );
@@ -57,18 +68,8 @@ class ApiService {
     }
   }
 
-  //méthode pour obtenir les en-têtes de base
-  Map<String, String> _headers() {
-    return {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-  }
+  // ===== UTILISATEUR =====
 
-
-  // ===== UTILISATEURS =====
-
-  // Récupérer les données de l'utilisateur connecté
   Future<Map<String, dynamic>> getCurrentUser() async {
     try {
       final headers = await _getAuthHeaders();
@@ -80,7 +81,6 @@ class ApiService {
       if (response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else if (response.statusCode == 401) {
-        // Token expiré ou invalide
         await _authService.logout();
         return {
           'success': false,
@@ -100,7 +100,7 @@ class ApiService {
     }
   }
 
-  // Récupérer tous les utilisateurs
+  // Récupérer tous les utilisateurs (si nécessaire ailleurs)
   Future<List<User>?> fetchAllUsers() async {
     try {
       final headers = await _getAuthHeaders();
@@ -113,7 +113,6 @@ class ApiService {
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((userData) => User.fromJson(userData)).toList();
       } else if (response.statusCode == 401) {
-        // Token expiré ou invalide
         await _authService.logout();
         return null;
       } else {
@@ -126,85 +125,8 @@ class ApiService {
     }
   }
 
-  // ===== GESTION DES PRÉSENCES =====
+  // ===== HISTORIQUE DES PRÉSENCES =====
 
-  // Enregistrer une présence
-  Future<bool> recordPresence(String qrCode) async {
-    try {
-      final headers = await _getAuthHeaders();
-      final response = await http.post(
-        Uri.parse('${ApiConfig.apiUrl}/record-presence'),
-        headers: headers,
-        body: jsonEncode({
-          'qrCode': qrCode,
-        }),
-      );
-
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Erreur lors de l\'enregistrement de la présence: $e');
-      return false;
-    }
-  }
-
-  //envoyer une requete post lors du scannage
-  Future<Map<String, dynamic>?> postScanData() async {
-    final token = await _authService.getToken();
-
-    if (token == null) {
-       print("❌ Aucun token trouvé. L'utilisateur doit se reconnecter.");
-      return {
-        "success": false,
-        "message": "Aucun token trouvé. Veuillez vous reconnecter."
-      };
-    }
-
-    final url = Uri.parse('${ApiConfig.apiUrl}/presences');
-    final now = DateTime.now().toIso8601String();
-
-    print("📡 Envoi de la requête à $url avec la date $now");
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          "scanned_at": now,
-        }),
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        print("✅ Scan enregistré avec succès.");
-        return {
-          "success": true,
-          "message": "Scan enregistré avec succès.",
-          "data": data
-        };
-      } else {
-        print("⚠️ Erreur lors de l'enregistrement du scan : ${data['message']}");
-        return {
-          "success": false,
-          "message": data['message'] ?? "Erreur lors de l'envoi du scan",
-          "status": response.statusCode,
-          "response": data
-        };
-      }
-    } catch (e) {
-      print("❌ Exception capturée : $e");
-      return {
-        "success": false,
-        "message": "Erreur réseau: $e",
-      };
-    }
-  }
-
-  // Récupérer l'historique des présences
   Future<List<Map<String, dynamic>>?> fetchPresenceHistory() async {
     try {
       final headers = await _getAuthHeaders();
@@ -229,5 +151,6 @@ class ApiService {
     }
   }
 
+  // Méthode vide réservée à un futur enregistrement utilisateur
   register(Map<String, dynamic> userData) {}
 }
