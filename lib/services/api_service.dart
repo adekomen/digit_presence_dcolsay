@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import '../models/user.dart';
 import 'package:digit_presence/services/auth_service.dart';
 import 'package:digit_presence/services/config.dart';
+import 'package:intl/intl.dart';
+
 
 class ApiService {
   // Singleton pattern
@@ -37,20 +39,40 @@ class ApiService {
 
   Future<Map<String, dynamic>?> validateQRCode(String? code) async {
     if (code == null) {
+      print('❌ Code QR nul');
       return {'success': false, 'message': 'Code QR invalide'};
     }
 
+    print('📷 QR code scanné : $code');
+
     try {
       final headers = await _getAuthHeaders();
+      print('📨 Headers envoyés : $headers');
+
       if (!headers.containsKey('Authorization')) {
+        print('❌ Pas de token');
         return {'success': false, 'message': 'Utilisateur non authentifié'};
       }
 
-      final response = await http.post(
-        Uri.parse('${ApiConfig.apiUrl}/presences'),
-        headers: headers,
-        body: jsonEncode({'qrCode': code}),
-      );
+      // Encapsulate the code in a JSON object with the expected format
+      Map<String, dynamic> qrData;
+      try {
+        qrData = json.decode(code);
+      } catch (e) {
+        // Format the plain text as expected by the backend
+        String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+        qrData = {"qrCode": "$code|$formattedDate"};
+      }
+
+      final body = jsonEncode(qrData);
+      print('📤 Corps envoyé : $body');
+
+      final url = Uri.parse('${ApiConfig.apiUrl}/presences');
+      print('🌐 URL de requête : $url');
+
+      final response = await http.post(url, headers: headers, body: body);
+      print('✅ Code HTTP : ${response.statusCode}');
+      print('🧾 Réponse serveur : ${response.body}');
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -58,15 +80,16 @@ class ApiService {
         await _authService.logout();
         return {'success': false, 'message': 'Session expirée'};
       } else {
-        print('Erreur de réponse : ${response.statusCode}');
-        print('Réponse du serveur : ${response.body}');
         return {'success': false, 'message': 'Erreur serveur'};
       }
     } catch (e) {
-      print('Erreur lors de la validation : $e');
+      print('💥 Erreur lors de la validation : $e');
       return {'success': false, 'message': 'Erreur de réseau'};
     }
   }
+
+
+
 
   // ===== UTILISATEUR =====
 

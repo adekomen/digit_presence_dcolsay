@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import '../screens/result_screen.dart';
 import 'package:digit_presence/services/api_service.dart';
+import 'package:intl/intl.dart';
 
 class QRScanner extends StatefulWidget {
   final ApiService apiService;
@@ -148,80 +149,61 @@ class QRScannerState extends State<QRScanner> {
     });
 
     controller.scannedDataStream.listen((scanData) async {
-      // Éviter les scans multiples
       if (isLoading) return;
 
-      // Arrêter le scanner après le scan
       controller.pauseCamera();
-
       setState(() {
         result = scanData;
-        isLoading = true; // Afficher l'indicateur de chargement
+        isLoading = true;
       });
 
       try {
-        // Décoder les données QR
         final qrContent = scanData.code;
+        print("QR content scanné : $qrContent");
+
         if (qrContent == null || qrContent.isEmpty) {
           _showError("QR Code vide ou invalide");
           return;
         }
 
-        // Vérifier si le contenu est du JSON valide
+        // Encapsulate non-JSON content in a JSON object with a 'qrCode' key
+        Map<String, dynamic> qrData;
         try {
-          final qrData = json.decode(qrContent);
-
-          // Vérifier la signature de l'application
-          if (qrData['app_signature'] != null &&
-              qrData['app_signature'].toString().startsWith('DigiPresence_')) {
-            // Vérifier la validité du hash localement
-            final originalHash = qrData['hash'];
-
-            // Créer une copie pour vérification sans modifier l'original
-            final qrDataForVerification = Map<String, dynamic>.from(qrData);
-            qrDataForVerification.remove('hash');
-            final dataToHash = qrDataForVerification.toString();
-            final calculatedHash =
-                sha256.convert(utf8.encode(dataToHash)).toString();
-
-            if (originalHash == calculatedHash) {
-              // Vérifier avec l'API
-              final response =
-                  await widget.apiService.validateQRCode(qrContent);
-
-              if (response != null && response['success'] == true) {
-                final userData = response['data']['user'];
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => ResultScreen(
-                      isValid: true,
-                      userName: userData['lastname'] ?? '',
-                      userEmail: userData['email'] ?? '',
-                    ),
-                  ),
-                );
-              } else {
-                _showError(response?['message'] ??
-                    "Erreur de validation avec le serveur");
-              }
-            } else {
-              _showError("QR Code non valide (hash incorrect)");
-            }
-          } else {
-            _showError("QR Code non reconnu par l'application");
-          }
+          qrData = json.decode(qrContent);
         } catch (e) {
-          log('Erreur lors du décodage du QR code: $e');
-          _showError("Format de QR Code invalide");
+          // Format the plain text as expected by the backend
+          String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+          qrData = {"qrCode": "$qrContent|$formattedDate"};
+        }
+
+        // Appel à l'API pour validation du QR Code
+        final response = await widget.apiService.validateQRCode(json.encode(qrData));
+        print("Réponse API : $response");
+
+        if (response != null && response['success'] == true) {
+          final userData = response['data']['user'];
+          print("Utilisateur reconnu : ${userData['lastname']}");
+
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ResultScreen(
+                isValid: true,
+                userName: userData['lastname'] ?? '',
+                userEmail: userData['email'] ?? '',
+              ),
+            ),
+          );
+        } else {
+          _showError(response?['message'] ?? "Erreur de validation avec le serveur");
         }
       } catch (e) {
-        log('Erreur lors de la validation du QR code: $e');
+        print("Erreur lors de la validation : $e");
         _showError("Une erreur s'est produite");
       } finally {
         setState(() {
-          isLoading = false; // Masquer l'indicateur de chargement
+          isLoading = false;
         });
-        await Future.delayed(const Duration(seconds: 3));
+        await Future.delayed(const Duration(seconds: 2));  // Délai ajusté pour ne pas bloquer l'utilisateur
         if (mounted) {
           controller.resumeCamera();
         }

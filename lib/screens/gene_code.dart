@@ -21,7 +21,7 @@ class _GeneCodeState extends State<GeneCode> {
     final token = await widget.apiService.getToken(); // Méthode à adapter si besoin
 
     final response = await http.get(
-      Uri.parse('${ApiConfig.apiUrl}/generate-qr'),
+      Uri.parse('${ApiConfig.apiUrl}/entreprises/1/qrcode'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'image/png',
