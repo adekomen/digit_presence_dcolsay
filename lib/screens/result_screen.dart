@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 class ResultScreen extends StatefulWidget {
   final bool isValid;
   final String? userName;
-  final String? userEmail;
+  final String? scanStatus;
   final String? errorMessage;
+  final String? scanTime;  // Ajouter l'heure du scan
 
   const ResultScreen({
     super.key,
     required this.isValid,
     this.userName,
-    this.userEmail,
+    this.scanStatus,
     this.errorMessage,
+    this.scanTime,  // Passer l'heure du scan
   });
 
   @override
@@ -45,7 +47,7 @@ class _ResultScreenState extends State<ResultScreen> {
               ),
             ),
             const SizedBox(height: 30),
-            if (widget.isValid && widget.userName != null && widget.userEmail != null) ...[
+            if (widget.isValid && widget.userName != null && widget.scanStatus != null) ...[
               Container(
                 padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -62,7 +64,12 @@ class _ResultScreenState extends State<ResultScreen> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Email: ${widget.userEmail}',
+                      'Statut : ${widget.scanStatus}',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Heure du scan : ${widget.scanTime}',  // Afficher l'heure du scan
                       style: const TextStyle(fontSize: 18),
                     ),
                     const SizedBox(height: 20),
@@ -84,8 +91,7 @@ class _ResultScreenState extends State<ResultScreen> {
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Text(
-                  widget.errorMessage ??
-                      'Ce QR Code n\'est pas valide pour cette application',
+                  widget.errorMessage ?? 'Ce QR Code n\'est pas valide pour cette application',
                   style: const TextStyle(fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
@@ -95,10 +101,8 @@ class _ResultScreenState extends State<ResultScreen> {
             ElevatedButton(
               onPressed: () {
                 if (widget.isValid) {
-                  // Retourner à l'onglet d'accueil (index 0)
                   Navigator.pop(context, 0);
                 } else {
-                  // Retourner à l'onglet scanner (index 1)
                   Navigator.pop(context, 1);
                 }
               },

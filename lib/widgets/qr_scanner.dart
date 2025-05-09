@@ -173,12 +173,11 @@ class QRScannerState extends State<QRScanner> {
           return;
         }
 
-        // Encapsulate non-JSON content in a JSON object with a 'qrCode' key
+        // Encapsuler le contenu non-JSON dans un objet JSON avec une clé 'qrCode'
         Map<String, dynamic> qrData;
         try {
           qrData = json.decode(qrContent);
         } catch (e) {
-          // Format the plain text as expected by the backend
           String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
           qrData = {"qrCode": "$qrContent|$formattedDate"};
         }
@@ -187,16 +186,20 @@ class QRScannerState extends State<QRScanner> {
         final response = await widget.apiService.validateQRCode(json.encode(qrData));
         print("Réponse API : $response");
 
-        if (response != null && response['status'] == 'success') {  // Check for 'status' instead of 'success'
+        if (response != null && response['status'] == 'success') {  
           final userData = response['data'];
           print("Utilisateur reconnu : ${userData['nom_utilisateur']}");
+
+          // Obtenir l'heure actuelle du scan
+          String scanTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => ResultScreen(
                 isValid: true,
-                userName: "${userData['nom_utilisateur']} ${userData['prenom_utilisateur']}", 
-                userEmail: userData['email'] ?? '',
+                userName: "${userData['nom_utilisateur']} ${userData['prenom_utilisateur']}",
+                scanStatus: userData['statut_presence'],
+                scanTime: scanTime,  // Passer l'heure du scan
               ),
             ),
           );
@@ -210,13 +213,14 @@ class QRScannerState extends State<QRScanner> {
         setState(() {
           isLoading = false;
         });
-        await Future.delayed(const Duration(seconds: 2));  // Délai ajusté pour ne pas bloquer l'utilisateur
+        await Future.delayed(const Duration(seconds: 2));  
         if (mounted) {
           controller.resumeCamera();
         }
       }
     });
   }
+
 
 
   void _showError(String message) {
