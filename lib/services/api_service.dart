@@ -74,7 +74,7 @@ class ApiService {
       print('✅ Code HTTP : ${response.statusCode}');
       print('🧾 Réponse serveur : ${response.body}');
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);
       } else if (response.statusCode == 401) {
         await _authService.logout();
