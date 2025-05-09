@@ -166,6 +166,13 @@ class QRScannerState extends State<QRScanner> {
           return;
         }
 
+        // Vérifier si l'utilisateur est authentifié
+        final token = await widget.apiService.getToken();
+        if (token == null) {
+          _showError("Utilisateur non authentifié");
+          return;
+        }
+
         // Encapsulate non-JSON content in a JSON object with a 'qrCode' key
         Map<String, dynamic> qrData;
         try {
@@ -180,15 +187,15 @@ class QRScannerState extends State<QRScanner> {
         final response = await widget.apiService.validateQRCode(json.encode(qrData));
         print("Réponse API : $response");
 
-        if (response != null && response['success'] == true) {
-          final userData = response['data']['user'];
-          print("Utilisateur reconnu : ${userData['lastname']}");
+        if (response != null && response['status'] == 'success') {  // Check for 'status' instead of 'success'
+          final userData = response['data'];
+          print("Utilisateur reconnu : ${userData['nom_utilisateur']}");
 
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => ResultScreen(
                 isValid: true,
-                userName: userData['lastname'] ?? '',
+                userName: "${userData['nom_utilisateur']} ${userData['prenom_utilisateur']}", 
                 userEmail: userData['email'] ?? '',
               ),
             ),
@@ -210,6 +217,7 @@ class QRScannerState extends State<QRScanner> {
       }
     });
   }
+
 
   void _showError(String message) {
     Navigator.of(context).push(
