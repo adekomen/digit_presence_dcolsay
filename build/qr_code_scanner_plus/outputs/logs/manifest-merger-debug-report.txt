@@ -1,0 +1,19 @@
+-- Merging decision tree log ---
+manifest
+ADDED from C:\Users\THON CARNELL\AppData\Local\Pub\Cache\hosted\pub.dev\qr_code_scanner_plus-2.0.10+1\android\src\main\AndroidManifest.xml:1:1-4:12
+INJECTED from C:\Users\THON CARNELL\AppData\Local\Pub\Cache\hosted\pub.dev\qr_code_scanner_plus-2.0.10+1\android\src\main\AndroidManifest.xml:1:1-4:12
+	package
+		ADDED from C:\Users\THON CARNELL\AppData\Local\Pub\Cache\hosted\pub.dev\qr_code_scanner_plus-2.0.10+1\android\src\main\AndroidManifest.xml:1:11-54
+		INJECTED from C:\Users\THON CARNELL\AppData\Local\Pub\Cache\hosted\pub.dev\qr_code_scanner_plus-2.0.10+1\android\src\main\AndroidManifest.xml
+	xmlns:tools
+		ADDED from C:\Users\THON CARNELL\AppData\Local\Pub\Cache\hosted\pub.dev\qr_code_scanner_plus-2.0.10+1\android\src\main\AndroidManifest.xml:2:5-51
+uses-sdk
+ADDED from C:\Users\THON CARNELL\AppData\Local\Pub\Cache\hosted\pub.dev\qr_code_scanner_plus-2.0.10+1\android\src\main\AndroidManifest.xml:3:3-71
+INJECTED from C:\Users\THON CARNELL\AppData\Local\Pub\Cache\hosted\pub.dev\qr_code_scanner_plus-2.0.10+1\android\src\main\AndroidManifest.xml:3:3-71
+INJECTED from C:\Users\THON CARNELL\AppData\Local\Pub\Cache\hosted\pub.dev\qr_code_scanner_plus-2.0.10+1\android\src\main\AndroidManifest.xml:3:3-71
+	tools:overrideLibrary
+		ADDED from C:\Users\THON CARNELL\AppData\Local\Pub\Cache\hosted\pub.dev\qr_code_scanner_plus-2.0.10+1\android\src\main\AndroidManifest.xml:3:13-68
+	android:targetSdkVersion
+		INJECTED from C:\Users\THON CARNELL\AppData\Local\Pub\Cache\hosted\pub.dev\qr_code_scanner_plus-2.0.10+1\android\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from C:\Users\THON CARNELL\AppData\Local\Pub\Cache\hosted\pub.dev\qr_code_scanner_plus-2.0.10+1\android\src\main\AndroidManifest.xml
